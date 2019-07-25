@@ -33,6 +33,8 @@ struct VarOrRVar {
     VarOrRVar(const Var &v) : var(v), is_rvar(false) {}
     VarOrRVar(const RVar &r) : rvar(r), is_rvar(true) {}
     VarOrRVar(const RDom &r) : rvar(RVar(r)), is_rvar(true) {}
+    template<int N>
+    VarOrRVar(const ImplicitVar<N> &u) : var(u), is_rvar(false) {}
 
     const std::string &name() const {
         if (is_rvar) return rvar.name();
@@ -76,23 +78,14 @@ class Stage {
     Stage &compute_with(LoopLevel loop_level, const std::map<std::string, LoopAlignStrategy> &align);
 
 public:
-    Stage(Internal::Function f, Internal::Definition d, size_t stage_index,
-          const std::vector<Var> &args)
-            : function(f), definition(d), stage_index(stage_index), dim_vars(args) {
-        internal_assert(definition.defined());
-        internal_assert(definition.args().size() == dim_vars.size());
-        definition.schedule().touched() = true;
-    }
-
-    Stage(Internal::Function f, Internal::Definition d, size_t stage_index,
-          const std::vector<std::string> &args)
-            : function(f), definition(d), stage_index(stage_index) {
+    Stage(Internal::Function f, Internal::Definition d, size_t stage_index)
+        : function(std::move(f)), definition(std::move(d)), stage_index(stage_index) {
         internal_assert(definition.defined());
         definition.schedule().touched() = true;
 
-        std::vector<Var> dim_vars(args.size());
-        for (size_t i = 0; i < args.size(); i++) {
-            dim_vars[i] = Var(args[i]);
+        dim_vars.reserve(function.args().size());
+        for (const auto &arg : function.args()) {
+            dim_vars.emplace_back(arg);
         }
         internal_assert(definition.args().size() == dim_vars.size());
     }
@@ -756,6 +749,16 @@ public:
      Buffer<int32_t> result = f.realize(10, 10, t, { { p, 17 }, { img, arg_img } });
      \endcode
      *
+     * If the Func cannot be realized into a buffer of the given size
+     * due to scheduling constraints on scattering update definitions,
+     * it will be realized into a larger buffer of the minimum size
+     * possible, and a cropped view at the requested size will be
+     * returned. It is thus not safe to assume the returned buffers
+     * are contiguous in memory. This behavior can be disabled with
+     * the NoBoundsQuery target flag, in which case an error about
+     * writing out of bounds on the output buffer will trigger
+     * instead.
+     *
      */
     // @{
     Realization realize(std::vector<int32_t> sizes, const Target &target = Target(),
@@ -958,11 +961,10 @@ public:
      * normally happens on the first call to realize. If you're
      * running your halide pipeline inside time-sensitive code and
      * wish to avoid including the time taken to compile a pipeline,
-     * then you can call this ahead of time. Returns the raw function
-     * pointer to the compiled pipeline. Default is to use the Target
+     * then you can call this ahead of time. Default is to use the Target
      * returned from Halide::get_jit_target_from_environment()
      */
-    void *compile_jit(const Target &target = get_jit_target_from_environment());
+    void compile_jit(const Target &target = get_jit_target_from_environment());
 
     /** Set the error handler function that be called in the case of
      * runtime errors during halide pipelines. If you are compiling

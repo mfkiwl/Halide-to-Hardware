@@ -15,7 +15,7 @@ fi
 
 if [ ${BUILD_SYSTEM} = 'CMAKE' ]; then
   : ${HALIDE_SHARED_LIBRARY:?"HALIDE_SHARED_LIBRARY must be set"}
-  LLVM_VERSION_NO_DOT="$( echo ${LLVM_VERSION} | sed 's/\.//' | cut -b1,2 )"
+  LLVM_VERSION_NO_DOT="$( echo ${LLVM_VERSION} | sed 's/\([0-9][0-9]*\)\.0.*/\10/' )"
   mkdir -p build/ && cd build/
   cmake -DLLVM_INCLUDE="/usr/local/llvm/include" \
         -DLLVM_LIB="/usr/local/llvm/lib" \
@@ -78,3 +78,4 @@ else
   echo "Unexpected BUILD_SYSTEM: \"${BUILD_SYSTEM}\""
   exit 1
 fi
+

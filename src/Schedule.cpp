@@ -41,7 +41,7 @@ struct LoopLevelContents {
 };
 
 template<>
-RefCount &ref_count<LoopLevelContents>(const LoopLevelContents *p) {
+RefCount &ref_count<LoopLevelContents>(const LoopLevelContents *p) noexcept {
     return p->ref_count;
 }
 
@@ -268,7 +268,7 @@ struct FuncScheduleContents {
 };
 
 template<>
-RefCount &ref_count<FuncScheduleContents>(const FuncScheduleContents *p) {
+RefCount &ref_count<FuncScheduleContents>(const FuncScheduleContents *p) noexcept {
     return p->ref_count;
 }
 
@@ -319,7 +319,7 @@ struct StageScheduleContents {
 };
 
 template<>
-RefCount &ref_count<StageScheduleContents>(const StageScheduleContents *p) {
+RefCount &ref_count<StageScheduleContents>(const StageScheduleContents *p) noexcept {
     return p->ref_count;
 }
 

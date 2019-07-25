@@ -215,7 +215,7 @@ struct ModuleContents {
 };
 
 template<>
-RefCount &ref_count<ModuleContents>(const ModuleContents *t) {
+RefCount &ref_count<ModuleContents>(const ModuleContents *t) noexcept {
     return t->ref_count;
 }
 
@@ -348,7 +348,6 @@ Module link_modules(const std::string &name, const std::vector<Module> &modules)
 
     return output;
 }
-
 
 Buffer<uint8_t> Module::compile_to_buffer() const {
     // TODO: This Hexagon specific code should be removed as soon as possible.

@@ -24,6 +24,7 @@
 
 #ifndef HALIDE_EXPORT
 #if defined(_MSC_VER)
+// Halide_EXPORTS is quietly defined by CMake when building a shared library
 #ifdef Halide_EXPORTS
 #define HALIDE_EXPORT __declspec(dllexport)
 #else
@@ -134,9 +135,6 @@ std::string running_program_name();
 std::string unique_name(char prefix);
 std::string unique_name(const std::string &prefix);
 // @}
-
-/** Reset the unique name counters to zeros. */
-void reset_unique_name_counters();
 
 /** Test if the first string starts with the second string */
 bool starts_with(const std::string &str, const std::string &prefix);
@@ -264,6 +262,19 @@ void dir_rmdir(const std::string &name);
 
 /** Wrapper for stat(). Asserts upon error. */
 FileStat file_stat(const std::string &name);
+
+/** Read the entire contents of a file into a vector<char>. The file
+ * is read in binary mode. Errors trigger an assertion failure. */
+std::vector<char> read_entire_file(const std::string &pathname);
+
+/** Create or replace the contents of a file with a given pointer-and-length
+ * of memory. If the file doesn't exist, it is created; if it does exist, it
+ * is completely overwritten. Any error triggers an assertion failure. */
+void write_entire_file(const std::string &pathname, const void *source, size_t source_len);
+
+inline void write_entire_file(const std::string &pathname, const std::vector<char> &source) {
+    write_entire_file(pathname, source.data(), source.size());
+}
 
 /** A simple utility class that creates a temporary file in its ctor and
  * deletes that file in its dtor; this is useful for temporary files that you
