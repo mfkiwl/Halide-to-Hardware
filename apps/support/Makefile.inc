@@ -34,7 +34,11 @@ SANITIZER_FLAGS ?=
 GENERATOR_OUTPUTS ?= static_library,h,registration,stmt,assembly
 
 # This pulls in the definition of HALIDE_SYSTEM_LIBS and HALIDE_RTTI
+#include $(HALIDE_DISTRIB_PATH)/halide_config.make
+ifneq ("$(wildcard $(HALIDE_DISTRIB_PATH)/halide_config.make)","")
 include $(HALIDE_DISTRIB_PATH)/halide_config.make
+endif
+
 
 ifeq ($(OS), Windows_NT)
 # Flags for mingw environment
