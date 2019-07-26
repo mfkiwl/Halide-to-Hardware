@@ -16,7 +16,6 @@ addons:
       - libpng-dev
       - graphviz
 env:
-<<<<<<< HEAD
   # Configurations
   #
   # Each line in the ``env`` section represents a set of environment
