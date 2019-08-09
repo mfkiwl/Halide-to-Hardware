@@ -46,8 +46,8 @@ public:
 
         hw_coef.bound(x, 0, 62);
         hw_coef.bound(y, 0, 62);
-        hw_coef.bound(c, 0, 62);
-        hw_coef.bound(d, 0, 62);
+        hw_coef.bound(c, 0, 3);
+        hw_coef.bound(d, 0, 4);
 
         /* THE SCHEDULE */
         // CoreIR schedule
