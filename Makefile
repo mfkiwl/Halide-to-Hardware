@@ -390,6 +390,7 @@ SOURCE_FILES = \
   CodeGen_CoreIR_Target.cpp \
   CodeGen_CoreIR_Testbench.cpp \
   CodeGen_D3D12Compute_Dev.cpp \
+  CodeGen_Garnet_SoC.cpp \
   CodeGen_GPU_Dev.cpp \
   CodeGen_GPU_Host.cpp \
   CodeGen_Hexagon.cpp \
@@ -435,6 +436,7 @@ SOURCE_FILES = \
   HexagonOptimize.cpp \
   ImageParam.cpp \
   InferArguments.cpp \
+  InjectCMAIntrinsics.cpp \
   InjectHostDevBufferCopies.cpp \
   InjectOpenGLIntrinsics.cpp \
   Inline.cpp \
@@ -561,6 +563,7 @@ HEADER_FILES = \
   CodeGen_ARM.h \
   CodeGen_C.h \
   CodeGen_D3D12Compute_Dev.h \
+  CodeGen_Garnet_SoC.h \
   CodeGen_GPU_Dev.h \
   CodeGen_GPU_Host.h \
   CodeGen_Internal.h \
@@ -606,6 +609,7 @@ HEADER_FILES = \
   HexagonOptimize.h \
   ImageParam.h \
   InferArguments.h \
+  InjectCMAIntrinsics.h \
   InjectHostDevBufferCopies.h \
   InjectOpenGLIntrinsics.h \
   Inline.h \

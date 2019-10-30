@@ -7,6 +7,7 @@
 #include "CodeGen_C.h"
 #include "CodeGen_Internal.h"
 #include "CodeGen_CoreIR_Testbench.h"
+#include "CodeGen_Garnet_SoC.h"
 #include "CodeGen_VHLS_Testbench.h"
 #include "Debug.h"
 #include "HexagonOffload.h"
@@ -574,6 +575,26 @@ void Module::compile(const Outputs &output_files_arg) const {
       cg.compile(*this);
 
       contents->name = oldname;
+    }
+
+    if (!output_files.garnet_soc_source_name.empty()) {
+        debug(1) << "Module.compile(): garnet_soc_source_name " << output_files.garnet_soc_source_name << "\n";
+
+        std::string garnet_soc_output = output_files.garnet_soc_source_name;
+        std::ofstream file(garnet_soc_output);
+        Internal::CodeGen_Garnet_SoC cg(file, target());
+
+        /*
+        bool uses_folder = (garnet_soc_output.find("/") != std::string::npos);
+        std::string foldername = uses_folder ?
+                                 garnet_soc_output.substr(0, garnet_soc_output.find_last_of("/")+1) :
+                                 "";
+        cg.set_output_folder(foldername);
+
+        std::cout << "Module.compile(): garnet_soc_source_name " << garnet_soc_output
+                  << " with folder=" << foldername << " and name=" << name() << "\n";
+        */
+        cg.compile(*this);
     }
 
     if (!output_files.python_extension_name.empty()) {

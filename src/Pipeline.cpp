@@ -255,6 +255,16 @@ void Pipeline::compile_to_vhls(const string &filename,
   Module m = compile_to_module(args, fn_name, target);
   m.compile(Outputs().vhls_source(output_name(filename, m, ".cpp")));
 }
+
+void Pipeline::compile_to_garnet_soc(const string &filename,
+                                     const vector<Argument> &args,
+                                     const string &fn_name,
+                                     const Target &target) {
+    Target t = target;
+    if(!t.has_feature(Target::GarnetSOC)) { t = t.with_feature(Target::GarnetSOC); }
+    Module m = compile_to_module(args, fn_name, t);
+    m.compile(Outputs().garnet_soc_source(output_name(filename, m, ".c")));
+}
   
 void Pipeline::compile_to_python_extension(const string &filename,
                                            const vector<Argument> &args,

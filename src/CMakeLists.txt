@@ -285,6 +285,7 @@ set(HEADER_FILES
   CodeGen_ARM.h
   CodeGen_C.h
   CodeGen_D3D12Compute_Dev.h
+  CodeGen_Garnet_SoC.h
   CodeGen_GPU_Dev.h
   CodeGen_GPU_Host.h
   CodeGen_Internal.h
@@ -330,6 +331,7 @@ set(HEADER_FILES
   HexagonOptimize.h
   ImageParam.h
   InferArguments.h
+  InjectCMAIntrinsics.h
   InjectHostDevBufferCopies.h
   InjectOpenGLIntrinsics.h
   Inline.h
@@ -457,6 +459,7 @@ add_library(Halide ${HALIDE_LIBRARY_TYPE}
   CodeGen_ARM.cpp
   CodeGen_C.cpp
   CodeGen_D3D12Compute_Dev.cpp
+  CodeGen_Garnet_SoC.cpp
   CodeGen_GPU_Dev.cpp
   CodeGen_GPU_Host.cpp
   CodeGen_Hexagon.cpp
@@ -498,6 +501,7 @@ add_library(Halide ${HALIDE_LIBRARY_TYPE}
   HexagonOptimize.cpp
   ImageParam.cpp
   InferArguments.cpp
+  InjectCMAIntrinsics.cpp
   InjectHostDevBufferCopies.cpp
   InjectOpenGLIntrinsics.cpp
   Inline.cpp

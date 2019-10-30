@@ -217,7 +217,15 @@ public:
                          const std::vector<Argument> &,
                          const std::string &fn_name = "",
                          const Target &target = get_target_from_environment());
-    
+
+    /** Statically compile a pipeline to C source code for Garnet SoC
+     * Vectorization will fail, and parallelization will
+     * produce serial code. */
+    void compile_to_garnet_soc(const std::string &filename,
+                               const std::vector<Argument> &,
+                               const std::string &fn_name = "",
+                               const Target &target = get_target_from_environment());
+
     /** Emit a Python extension glue .c file. */
     void compile_to_python_extension(const std::string &filename,
                                      const std::vector<Argument> &args,

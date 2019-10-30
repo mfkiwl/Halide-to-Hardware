@@ -106,6 +106,7 @@ struct Target {
         CoreIR = halide_target_feature_coreir,
         CoreIRValid = halide_target_feature_coreir_valid,
         HLS = halide_target_feature_hls,
+        GarnetSOC = halide_target_feature_garnet_soc,
         FeatureEnd = halide_target_feature_end
     };
     Target() : os(OSUnknown), arch(ArchUnknown), bits(0) {}

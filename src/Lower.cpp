@@ -31,6 +31,7 @@
 #include "IROperator.h"
 #include "IRPrinter.h"
 #include "InferArguments.h"
+#include "InjectCMAIntrinsics.h"
 #include "InjectHostDevBufferCopies.h"
 #include "InjectOpenGLIntrinsics.h"
 #include "Inline.h"
@@ -192,7 +193,7 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
     s = uniquify_variable_names(s);
     debug(2) << "Lowering after uniquifying variable names:\n" << s << "\n\n";
 
-    if (t.has_feature(Target::CoreIR) || t.has_feature(Target::HLS)) {
+    if (t.has_feature(Target::CoreIR) || t.has_feature(Target::HLS) || t.has_feature(Target::GarnetSOC)) {
       // passes specific to HLS backend
       debug(1) << "Performing HLS target optimization..\n";
       //std::cout << "Performing HLS target optimization..." << s << '\n';
@@ -254,10 +255,12 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
     }
 
     debug(1) << "Performing storage flattening...\n";
-    //std::cout << "Before storage flattening...\n" << s << "\n\n";
     s = storage_flattening(s, outputs, env, t);
+    if(t.has_feature(Target::GarnetSOC)) {
+        s = inject_cma_intrinsics(s, env);
+    }
+
     debug(2) << "Lowering after storage flattening:\n" << s << "\n\n";
-    //std::cout << "Lowering after storage flattening:\n" << s << "\n\n";
 
     debug(1) << "Unpacking buffer arguments...\n";
     s = unpack_buffers(s);

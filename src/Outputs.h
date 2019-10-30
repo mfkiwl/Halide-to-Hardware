@@ -45,7 +45,11 @@ struct Outputs {
     /** The name of the emitted Vivado HLS source file. Empty if no Vivado HLS source file
      * output is desired. */
     std::string vhls_source_name;
-  
+
+    /** The name of the emitted C source file for garnet SoC. Empty if no Garnet SoC C source file
+     * output is desired. */
+    std::string garnet_soc_source_name;
+
     /** The name of the emitted stmt file. Empty if no stmt file
      * output is desired. */
     std::string stmt_name;
@@ -132,8 +136,16 @@ struct Outputs {
         Outputs updated = *this;
         updated.vhls_source_name = vhls_source_name;
         return updated;
-    }  
-  
+    }
+
+    /** Make a new Outputs struct that emits everything this one does
+     * and also a Garnet C source file with the given name. */
+    Outputs garnet_soc_source(const std::string &garnet_soc_source_name) {
+        Outputs updated = *this;
+        updated.garnet_soc_source_name = garnet_soc_source_name;
+        return updated;
+    }
+
     /** Make a new Outputs struct that emits everything this one does
      * and also a stmt file with the given name. */
     Outputs stmt(const std::string &stmt_name) const {

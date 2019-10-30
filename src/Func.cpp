@@ -3175,6 +3175,10 @@ void Func::compile_to_vhls(const string &filename, const vector<Argument> &args,
   pipeline().compile_to_vhls(filename, args, fn_name, target);
 }
 
+void Func::compile_to_garnet_soc(const string &filename, const vector<Argument> &args,
+                                 const string &fn_name, const Target &target) {
+    pipeline().compile_to_garnet_soc(filename, args, fn_name, target);
+}
 
 void Func::compile_to_lowered_stmt(const string &filename,
                                    const vector<Argument> &args,
