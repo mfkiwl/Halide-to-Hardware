@@ -73,6 +73,8 @@
 #include "WrapCalls.h"
 #include "WrapExternStages.h"
 
+#include "CostFunction.h"
+
 namespace Halide {
 namespace Internal {
 
@@ -131,6 +133,12 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
     bool any_memoized = false;
     Stmt s = schedule_functions(outputs, fused_groups, env, t, any_memoized);
     debug(2) << "Lowering after creating initial loop nests:\n" << s << '\n';
+    
+    // std::cout << "Inital loop nests (output of schedule_functions)\n";
+    // std::cout << s << "\n";
+    
+    int cost = compute_cost(s);
+    std::cout << "COMPUTED COST: " << cost << "\n"; 
 
     if (any_memoized) {
         debug(1) << "Injecting memoization...\n";
@@ -199,10 +207,16 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
       
       vector<HWKernelDAG> dags;
       s = extract_hw_kernel_dag(s, env, inlined_stages, dags);
+    //   std::cout << "Extract HW kernel DAG\n";
+    //   std::cout << s << "\n";
+ 
 
       for(const HWKernelDAG &dag : dags) {
         s = stream_opt(s, dag);
         //s = replace_image_param(s, dag);
+        // std::cout << "Stream optimization\n";
+        // std::cout << s << "\n";
+
       }
 
       debug(2) << "Lowering after HLS optimization:\n" << s << '\n';
@@ -403,7 +417,10 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
     } else {
         debug(1) << "Skipping Hexagon offload...\n";
     }
-    //std::cout << "after passes: " << s << std::endl;
+    // std::cout << "after passes: " << s << std::endl;
+
+    cost = compute_cost(s);
+    std::cout << "COMPUTED COST: " << cost << "\n"; 
 
     if (!custom_passes.empty()) {
         for (size_t i = 0; i < custom_passes.size(); i++) {
