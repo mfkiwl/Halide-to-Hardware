@@ -407,6 +407,7 @@ SOURCE_FILES = \
   CodeGen_VHLS_Target.cpp \
   CodeGen_VHLS_Testbench.cpp \
   CodeGen_X86.cpp \
+  CostFunction.cpp \
   CPlusPlusMangle.cpp \
   CSE.cpp \
   Debug.cpp \
@@ -575,6 +576,7 @@ HEADER_FILES = \
   CodeGen_PTX_Dev.h \
   CodeGen_X86.h \
   ConciseCasts.h \
+  CostFunction.h \
   CPlusPlusMangle.h \
   CSE.h \
   Debug.h \
