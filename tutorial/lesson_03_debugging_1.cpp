@@ -36,6 +36,8 @@ int main(int argc, char **argv) {
     Var x("x"), y("y");
     gradient(x, y) = x + y;
 
+    std::cout << "test\n";
+
     // Realize the function to produce an output image. We'll keep it
     // very small for this lesson.
     Buffer<int> output = gradient.realize(8, 8);

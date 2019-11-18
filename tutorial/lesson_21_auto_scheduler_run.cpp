@@ -22,27 +22,27 @@
 
 int main(int argc, char **argv) {
     // Let's declare and initialize the input images
-    Halide::Runtime::Buffer<float> input(1024, 1024, 3);
+    Halide::Runtime::Buffer<uint8_t> input(64, 64);
 
-    for (int c = 0; c < input.channels(); ++c) {
-        for (int y = 0; y < input.height(); ++y) {
-            for (int x = 0; x < input.width(); ++x) {
-                input(x, y, c) = rand();
-            }
+    for (int y = 0; y < input.height(); ++y) {
+        for (int x = 0; x < input.width(); ++x) {
+            // for (int z = 0; x < input.width(); ++x) {
+            //     input(x, y, z) = 0;
+            // }
+            input(x, y) = 0;
         }
     }
 
-    Halide::Runtime::Buffer<float> output1(1024, 1024);
-    Halide::Runtime::Buffer<float> output2(1024, 1024);
+    Halide::Runtime::Buffer<uint8_t> output(62, 62);
     // Run each version of the codes (with no auto-schedule and with
     // auto-schedule) multiple times for benchmarking.
     double auto_schedule_off = Halide::Tools::benchmark(2, 5, [&]() {
-        auto_schedule_false(input, 2.0f, output1, output2);
+        auto_schedule_false(input, output);
     });
     printf("Manual schedule: %gms\n", auto_schedule_off * 1e3);
 
     double auto_schedule_on = Halide::Tools::benchmark(2, 5, [&]() {
-        auto_schedule_true(input, 2.0f, output1, output2);
+        auto_schedule_true(input, output);
     });
     printf("Auto schedule: %gms\n", auto_schedule_on * 1e3);
 

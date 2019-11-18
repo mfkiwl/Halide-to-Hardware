@@ -136,11 +136,31 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
   // run on input image
   std::string hardware_name = args[0];
   std::function<void()> run_call = run_calls.at(hardware_name);
-  run_call();
+  
+  auto average_runtime = 0.0;
+  for (int i=0; i < 100; i++) {
+    // timing
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    run_call();
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    average_runtime += duration/100.0;
+  }
+
+  // auto t1 = std::chrono::high_resolution_clock::now();
+
+  // run_call();
+
+  // auto t2 = std::chrono::high_resolution_clock::now();
+  // auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+  // average_runtime = duration;
+
   std::string output_filename = "bin/output_" + hardware_name + ".png";
   convert_and_save_image(output, output_filename);
-
-  std::cout << "Ran " << design_name << " on " << hardware_name << "\n";
+    
+  std::cout << "Ran " << design_name << " on " << hardware_name << " in " << average_runtime << " microseconds\n";
   return 0;
 
 }

@@ -10,8 +10,8 @@ using namespace Halide::Tools;
 using namespace Halide::Runtime;
 
 int main(int argc, char **argv) {
-  int x = 128;
-  int y = 128;
+  int x = 64;
+  int y = 64;
   int k_x = 3;
   int k_y = 3;
   int z = 2;

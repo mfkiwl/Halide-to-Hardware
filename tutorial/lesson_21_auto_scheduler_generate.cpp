@@ -29,43 +29,46 @@ using namespace Halide;
 // We will define a generator to auto-schedule.
 class AutoScheduled : public Halide::Generator<AutoScheduled> {
 public:
-    Input<Buffer<float>>  input{"input", 3};
-    Input<float>          factor{"factor"};
+      Input<Buffer<uint8_t>>  input{"input", 2};
+    Output<Buffer<uint8_t>> output{"output", 2};
 
-    Output<Buffer<float>> output1{"output1", 2};
-    Output<Buffer<float>> output2{"output2", 2};
-
-    Expr sum3x3(Func f, Var x, Var y) {
-        return f(x-1, y-1) + f(x-1, y) + f(x-1, y+1) +
-               f(x, y-1)   + f(x, y)   + f(x, y+1) +
-               f(x+1, y-1) + f(x+1, y) + f(x+1, y+1);
-    }
+  int ksize = 3;
+  int imgsize = 62;
 
     void generate() {
-        // For our algorithm, we'll use Harris corner detection.
-        Func in_b = BoundaryConditions::repeat_edge(input);
+        /* THE ALGORITHM */
 
-        gray(x, y) = 0.299f * in_b(x, y, 0) + 0.587f * in_b(x, y, 1) + 0.114f * in_b(x, y, 2);
+        //Var x("x"), y("y");
 
-        Iy(x, y) = gray(x-1, y-1)*(-1.0f/12) + gray(x-1, y+1)*(1.0f/12) +
-                   gray(x, y-1)*(-2.0f/12) + gray(x, y+1)*(2.0f/12) +
-                   gray(x+1, y-1)*(-1.0f/12) + gray(x+1, y+1)*(1.0f/12);
+        Func kernel("kernel");
+        Func conv("conv");
+        RDom r(0, ksize,               0, ksize);
 
-        Ix(x, y) = gray(x-1, y-1)*(-1.0f/12) + gray(x+1, y-1)*(1.0f/12) +
-                   gray(x-1, y)*(-2.0f/12) + gray(x+1, y)*(2.0f/12) +
-                   gray(x-1, y+1)*(-1.0f/12) + gray(x+1, y+1)*(1.0f/12);
+        kernel(x,y) = 0;
+        kernel(0,0) = 17;      kernel(0,1) = 4;      kernel(0,2) = 6;
+        kernel(1,0) = 7;      kernel(1,1) = 19;       kernel(1,2) = 4;
+        kernel(2,0) = 5;      kernel(2,1) = 21;      kernel(2,2) = 15;
 
-        Ixx(x, y) = Ix(x, y) * Ix(x, y);
-        Iyy(x, y) = Iy(x, y) * Iy(x, y);
-        Ixy(x, y) = Ix(x, y) * Iy(x, y);
-        Sxx(x, y) = sum3x3(Ixx, x, y);
-        Syy(x, y) = sum3x3(Iyy, x, y);
-        Sxy(x, y) = sum3x3(Ixy, x, y);
-        det(x, y) = Sxx(x, y) * Syy(x, y) - Sxy(x, y) * Sxy(x, y);
-        trace(x, y) = Sxx(x, y) + Syy(x, y);
-        harris(x, y) = det(x, y) - 0.04f * trace(x, y) * trace(x, y);
-        output1(x, y) = harris(x + 2, y + 2);
-        output2(x, y) = factor * harris(x + 2, y + 2);
+        conv(x, y) = 0;
+
+        Func hw_input("hw_input");
+        hw_input(x, y) = cast<uint16_t>(input(x, y));
+        conv(x, y)  += kernel(r.x, r.y) * hw_input(x + r.x, y + r.y);
+        //conv(x,y) =
+        //  kernel(0,0)*hw_input(x,y) +
+        //  kernel(1,0)*hw_input(x+1,y) +
+        //  kernel(2,0)*hw_input(x+2,y) +
+        //  kernel(0,1)*hw_input(x,y+1) +
+        //  kernel(1,1)*hw_input(x+1,y+1) +
+        //  kernel(2,1)*hw_input(x+2,y+1) +
+        //  kernel(0,2)*hw_input(x,y+2) +
+        //  kernel(1,2)*hw_input(x+1,y+2) +
+        //  kernel(2,2)*hw_input(x+2,y+2);
+
+        Func hw_output("hw_output");
+        hw_output(x, y) = cast<uint8_t>(conv(x, y));
+        output(x, y) = hw_output(x,y);
+
     }
 
     void schedule() {
@@ -78,22 +81,29 @@ public:
             // of the input images ('input', 'filter', and 'bias'), we use the
             // set_bounds_estimate() method. set_bounds_estimate() takes in
             // (min, extent) of the corresponding dimension as arguments.
-            input.dim(0).set_bounds_estimate(0, 1024);
-            input.dim(1).set_bounds_estimate(0, 1024);
-            input.dim(2).set_bounds_estimate(0, 3);
+            input.dim(0).set_bounds_estimate(0, 64);
+            input.dim(1).set_bounds_estimate(0, 64);
+            //input.dim(2).set_bounds_estimate(0, 2);
+
+            // input.dim(0).set_bounds_estimate(0, 1024);
+            // input.dim(1).set_bounds_estimate(0, 1024);
+            // input.dim(2).set_bounds_estimate(0, 3);
 
             // To provide estimates on the parameter values, we use the
             // set_estimate() method.
-            factor.set_estimate(2.0f);
+            // factor.set_estimate(2.0f);
 
             // To provide estimates (min and extent values) for each dimension
             // of pipeline outputs, we use the estimate() method. estimate()
             // takes in (dim_name, min, extent) as arguments.
-            output1.estimate(x, 0, 1024)
-                   .estimate(y, 0, 1024);
+            // output1.estimate(x, 0, 1024)
+            //        .estimate(y, 0, 1024);
 
-            output2.estimate(x, 0, 1024)
-                   .estimate(y, 0, 1024);
+            // output2.estimate(x, 0, 1024)
+            //        .estimate(y, 0, 1024);
+            output.estimate(x, 0, 62)
+                  .estimate(y, 0, 62);
+                  //.estimate(w, 0, 4);
 
             // Technically, the estimate values can be anything, but the closer
             // they are to the actual use-case values, the better the generated
@@ -219,14 +229,10 @@ public:
             // hand or paste the schedule generated by the auto-scheduler.
             // We will use a naive schedule here to compare the performance of
             // the autoschedule with a basic schedule.
-            gray.compute_root();
-            Iy.compute_root();
-            Ix.compute_root();
         }
     }
 private:
-    Var x{"x"}, y{"y"}, c{"c"};
-    Func gray, Iy, Ix, Ixx, Iyy, Ixy, Sxx, Syy, Sxy, det, trace, harris;
+    Var x{"x"}, y{"y"};
 };
 
 // As in lesson 15, we register our generator and then compile this

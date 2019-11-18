@@ -7,8 +7,13 @@ using namespace Halide;
 class Convolution1x1Kernel : public Halide::Generator<Convolution1x1Kernel> {
 public:
     Input<Buffer<uint8_t>>  input{"input", 3};
-    Input<Buffer<uint8_t>>  kernel{"kernel", 4};
+    //Input<Buffer<uint8_t>>  kernel{"kernel", 4};
     Output<Buffer<uint8_t>> output{"output", 3};
+
+    int ksize = 1;
+    int imgsize = 62;
+    int k_z = 2;
+    int k_w = 4;
 
     void generate() {
         /* THE ALGORITHM */
@@ -17,11 +22,15 @@ public:
 
         Expr height = input.dim(0).extent();
         Expr width = input.dim(1).extent();
-        Expr k_z = kernel.dim(2).extent();
+        //Expr k_z = kernel.dim(2).extent();
+
+        Func kernel;
+        kernel(x,y,z,w) = 0;
+        kernel(0,0,0,0) = 11;     
 
         Func conv("conv");
-        RDom r(0, 1,
-               0, 1,
+        RDom r(0, ksize,
+               0, ksize,
                0, k_z);
 
         conv(x, y, w) = 0;

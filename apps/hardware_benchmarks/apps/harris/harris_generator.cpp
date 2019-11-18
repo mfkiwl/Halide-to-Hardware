@@ -166,6 +166,134 @@ public:
           lgxy.update(0).unroll(box.x).unroll(box.y);
 
           output.fuse(xo, yo, xo).parallel(xo).vectorize(xi, 4);
+          // Delete this line if not using Generator
+        //   Pipeline pipeline = get_pipeline();
+
+        //   Var x_vi("x_vi");
+        //   Var x_vo("x_vo");
+
+        //   Func cim = pipeline.get_func(13);
+        //   Func grad_x = pipeline.get_func(4);
+        //   Func grad_y = pipeline.get_func(8);
+        //   Func lgxx = pipeline.get_func(6);
+        //   Func lgxy = pipeline.get_func(10);
+        //   Func lgyy = pipeline.get_func(12);
+        //   Func lxx = pipeline.get_func(5);
+        //   Func lxy = pipeline.get_func(9);
+        //   Func lyy = pipeline.get_func(11);
+        //   Func output = pipeline.get_func(16);
+
+        //   {
+        //       Var x = cim.args()[0];
+        //       Var y = cim.args()[1];
+        //       cim
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = grad_x.args()[0];
+        //       Var y = grad_x.args()[1];
+        //       grad_x
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 8)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = grad_y.args()[0];
+        //       Var y = grad_y.args()[1];
+        //       grad_y
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 8)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = lgxx.args()[0];
+        //       Var y = lgxx.args()[1];
+        //       RVar box$x(lgxx.update(0).get_schedule().rvars()[0].var);
+        //       RVar box$y(lgxx.update(0).get_schedule().rvars()[1].var);
+        //       lgxx
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //       lgxx.update(0)
+        //           .reorder(box$x, x, box$y, y)
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = lgxy.args()[0];
+        //       Var y = lgxy.args()[1];
+        //       RVar box$x(lgxy.update(0).get_schedule().rvars()[0].var);
+        //       RVar box$y(lgxy.update(0).get_schedule().rvars()[1].var);
+        //       lgxy
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //       lgxy.update(0)
+        //           .reorder(box$x, x, box$y, y)
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = lgyy.args()[0];
+        //       Var y = lgyy.args()[1];
+        //       RVar box$x(lgyy.update(0).get_schedule().rvars()[0].var);
+        //       RVar box$y(lgyy.update(0).get_schedule().rvars()[1].var);
+        //       lgyy
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //       lgyy.update(0)
+        //           .reorder(box$x, x, box$y, y)
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = lxx.args()[0];
+        //       Var y = lxx.args()[1];
+        //       lxx
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = lxy.args()[0];
+        //       Var y = lxy.args()[1];
+        //       lxy
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = lyy.args()[0];
+        //       Var y = lyy.args()[1];
+        //       lyy
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 4)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
+        //   {
+        //       Var x = output.args()[0];
+        //       Var y = output.args()[1];
+        //       output
+        //           .compute_root()
+        //           .split(x, x_vo, x_vi, 16)
+        //           .vectorize(x_vi)
+        //           .parallel(y);
+        //   }
         }
     }
 };

@@ -123,6 +123,9 @@ public:
           hw_input.stream_to_accelerator().reorder_storage(c, x, y);
           
         }
+        else { // schedule to CPU
+          pw_conv_reduction.compute_root();
+        }
 
   }
   
