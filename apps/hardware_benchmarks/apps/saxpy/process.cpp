@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
                                             }
                                           });
 
-  processor.input = Buffer<uint8_t>(64, 64);
-  processor.output = Buffer<uint8_t>(64, 64);
+  processor.input = Buffer<uint8_t>(22, 22);
+  processor.output = Buffer<uint8_t>(22, 22);
   
   processor.process_command(argc, argv);
   

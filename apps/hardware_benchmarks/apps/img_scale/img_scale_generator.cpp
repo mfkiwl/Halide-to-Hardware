@@ -17,18 +17,21 @@ public:
         Func hw_input("hw_input");
         hw_input(x, y) = cast<int16_t>(input(x, y));
 
-        Func smin, smax, sclamp;
-        smin(x,y) = min( hw_input(x,y) , -30 );
-        smax(x,y) = max( hw_input(x,y) , 64 );
-        sclamp(x,y) = clamp( hw_input(x,y), 1, 150 );
+        Func smin, smax, scale;
+        smax(x,y) = max( hw_input(x,y) , 0 );
+        scale(x,y) = 2*smax(x,y);
+        smin(x,y) = min( scale(x,y) , 255 );
 
         Func hw_output("hw_output");
-        hw_output(x, y) = cast<uint8_t>(smin(x,y) + smax(x,y) - sclamp(x,y));
+        hw_output(x, y) = cast<uint8_t>(smin(x,y));
         output(x, y) = hw_output(x,y);
 
         /* THE SCHEDULE */
         if (get_target().has_feature(Target::CoreIR)) {
           Var xi,yi, xo,yo;
+
+          output.bound(x, 0, 10);
+          output.bound(y, 0, 10);
           
           hw_input.compute_root();
           hw_output.compute_root();
