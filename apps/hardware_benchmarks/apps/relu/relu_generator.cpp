@@ -28,8 +28,8 @@ public:
         if (get_target().has_feature(Target::CoreIR)) {
           Var xi,yi, xo,yo;
 
-          output.bound(x, 0, 64);
-          output.bound(y, 0, 64);
+          output.bound(x, 0, 8);
+          output.bound(y, 0, 8);
           
           hw_input.compute_root();
           hw_output.compute_root();

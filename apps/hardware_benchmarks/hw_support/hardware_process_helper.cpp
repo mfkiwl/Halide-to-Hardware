@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "HalideBuffer.h"
-#include "halide_image_io.h"
+//#include "halide_image_io.h"
 #include "halide_benchmark.h"
 
 #include "hardware_process_helper.h"
@@ -123,15 +123,16 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
   // Input image: create or load
   if (args.size() == 1 && hw_name_defined) {
     create_image(&input);
-  } else if (args.size() == 2 && hw_name_defined) {
-    input = load_and_convert_image(args[1]);
-  } else {
-    std::string hardware_set = enumerate_keys(run_calls);
-    std::cout << "Usage:\n"
-              << "  ./process run " << hardware_set << " [input.png]\n"
-              << "  Note: input.png is optional\n";
-    return 1;
-  }
+  } 
+  // else if (args.size() == 2 && hw_name_defined) {
+  //   input = load_and_convert_image(args[1]);
+  // } else {
+  //   std::string hardware_set = enumerate_keys(run_calls);
+  //   std::cout << "Usage:\n"
+  //             << "  ./process run " << hardware_set << " [input.png]\n"
+  //             << "  Note: input.png is optional\n";
+  //   return 1;
+  // }
 
   // run on input image
   std::string hardware_name = args[0];
