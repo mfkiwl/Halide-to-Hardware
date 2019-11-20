@@ -4,7 +4,7 @@
 
 #include "hardware_process_helper.h"
 #include "coreir_interpret.h"
-//#include "halide_image_io.h"
+#include "halide_image_io.h"
 
 using namespace Halide::Tools;
 using namespace Halide::Runtime;
