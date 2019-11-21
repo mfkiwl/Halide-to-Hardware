@@ -139,6 +139,10 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
   std::function<void()> run_call = run_calls.at(hardware_name);
   
   auto average_runtime = 0.0;
+  auto min_runtime = 100000000.0;
+  auto max_runtime = 0.0;
+  auto first_runtime = 0.0;
+
   for (int i=0; i < 100; i++) {
     // timing
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -146,22 +150,29 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
     run_call();
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-    average_runtime += duration/100.0;
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>( t2 - t1 ).count();
+    if (duration < min_runtime) {
+      min_runtime = duration;
+    }
+    else if (duration > max_runtime) {
+      max_runtime = duration;
+    }
+    if (i==0) {
+      first_runtime = duration;
+    }
+    else {
+      average_runtime += duration/100.0;
+    }
   }
-
-  // auto t1 = std::chrono::high_resolution_clock::now();
-
-  // run_call();
-
-  // auto t2 = std::chrono::high_resolution_clock::now();
-  // auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-  // average_runtime = duration;
 
   std::string output_filename = "bin/output_" + hardware_name + ".png";
   convert_and_save_image(output, output_filename);
     
-  std::cout << "Ran " << design_name << " on " << hardware_name << " in " << average_runtime << " microseconds\n";
+  std::cout << "Ran " << design_name << " on " << hardware_name << " in " << average_runtime << " nanoseconds\n";
+  std::cout << " Average runtime: " << average_runtime << " nanoseconds\n";
+  std::cout << " Min runtime: " << min_runtime << " nanoseconds\n";
+  std::cout << " Max runtime: " << max_runtime << " nanoseconds\n";
+  std::cout << " First runtime: " << first_runtime << " nanoseconds\n";
   return 0;
 
 }
