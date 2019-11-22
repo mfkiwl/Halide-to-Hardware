@@ -21,7 +21,7 @@ public:
         Var x("x"), y("y");
 
         Func f_gemm("gemm");
-        RDom r(0, 64);
+        RDom r(0, 4);
 
         Func hw_input("hw_input");
         hw_input(x, y) = cast<uint16_t>(input(x, y));
@@ -46,8 +46,8 @@ public:
         /* THE SCHEDULE */
         if (get_target().has_feature(Target::CoreIR)) {
            Var xi,yi, xo,yo;
-	   output.bound(x, 0, 64);
-	   output.bound(y, 0, 64);
+	   output.bound(x, 0, 4);
+	   output.bound(y, 0, 4);
            hw_input.compute_root();
            //hw_input_B.compute_root();
 	   //    hw_input_C.compute_root();

@@ -1,31 +1,39 @@
 #include <cstdio>
+#include <chrono>
 
 #include "up_sample.h"
 
-#include "hardware_process_helper.h"
-#include "coreir_interpret.h"
-#include "halide_image_io.h"
+#include "halide_benchmark.h"
+#include "HalideBuffer.h"
 
 using namespace Halide::Tools;
 using namespace Halide::Runtime;
 
 int main(int argc, char **argv) {
 
-  OneInOneOut_ProcessController<uint8_t> processor("up_sample",
-                                            {
-                                              {"cpu",
-                                                  [&]() { up_sample(processor.input, processor.output); }
-                                              },
-                                              {"coreir",
-                                                  [&]() { run_coreir_on_interpreter<>("bin/design_top.json", processor.input, processor.output,
-                                                                                      "self.in_arg_0_0_0", "self.out_0_0"); }
-                                              }
+    Buffer<int8_t> input(20, 20, 128);
+    Buffer<uint8_t> output(40, 40, 128);
 
-                                            });
 
-  processor.input = Buffer<uint8_t>(64, 64, 4);
-  processor.output = Buffer<uint8_t>(128, 128, 4);
-  
-  processor.process_command(argc, argv);
+    for (int c = 0; c < input.channels(); c++)
+    for (int h = 0; h < input.height(); h++)
+    for (int w = 0; w < input.width(); w++) {
+      input(w, h, c) = (int8_t)rand();
+    }
+    
+
+    printf("Start compile!\n");
+    up_sample(input, output);
+    printf("Finish compile, start running!\n");
+
+    // Timing code
+
+    // Manually-tuned version
+    double min_t_manual = benchmark(100, 20, [&]() {
+        up_sample(input, output);
+    });
+    printf("Manually-tuned time: %gms\n", min_t_manual * 1e3);
+
+    return 0;
   
 }

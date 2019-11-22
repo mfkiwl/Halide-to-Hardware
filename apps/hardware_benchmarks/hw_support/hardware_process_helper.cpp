@@ -173,6 +173,12 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
   std::cout << " Min runtime: " << min_runtime << " nanoseconds\n";
   std::cout << " Max runtime: " << max_runtime << " nanoseconds\n";
   std::cout << " First runtime: " << first_runtime << " nanoseconds\n";
+
+  double min_t_manual = benchmark(100, 5, [&]() {
+      run_call();
+  });
+  printf("benchmark time: %gms\n", min_t_manual * 1e3);
+
   return 0;
 
 }

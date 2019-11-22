@@ -10,11 +10,11 @@ using namespace Halide::Tools;
 using namespace Halide::Runtime;
 
 int main(int argc, char **argv) {
-  int x = 64;
-  int y = 64;
+  int x = 16;
+  int y = 16;
   int k_x = 3;
   int k_y = 3;
-  int z = 2;
+  int z = 32;
   int w = 4;
 
   OneInOneOut_ProcessController<uint8_t> processor("unet_conv_3_3",

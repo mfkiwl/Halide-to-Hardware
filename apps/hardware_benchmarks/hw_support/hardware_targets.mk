@@ -56,7 +56,7 @@ generator $(BIN)/$(TESTNAME).generator: $(TESTNAME)_generator.cpp $(GENERATOR_DE
 
 design design-cpu $(BIN)/$(TESTNAME).a: $(BIN)/$(TESTNAME).generator
 	@-mkdir -p $(BIN)
-	$^ -g $(TESTNAME) -o $(BIN) -f $(TESTNAME) target=$(HL_TARGET)
+	$^ -g $(TESTNAME) -o $(BIN) -f $(TESTNAME) target=$(HL_TARGET) 
 
 design-coreir $(BIN)/design_top.json $(BIN)/design_top.txt: $(BIN)/$(TESTNAME).generator
 	@if [ $(USE_COREIR_VALID) -ne "0" ]; then \

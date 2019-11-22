@@ -11,7 +11,7 @@ using namespace Halide::Tools;
 using namespace Halide::Runtime;
 
 int main(int argc, char **argv) {
-     //int Batch = 1;
+    //int Batch = 1;
     int Height = 64;
     int Width = 64;
     int Chin = 32;

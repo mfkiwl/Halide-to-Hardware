@@ -10,7 +10,7 @@ public:
     Output<Buffer<uint8_t>> output{"output", 2};
 
   int ksize = 3;
-  int imgsize = 2;
+  int imgsize = 62;
 
     void generate() {
         /* THE ALGORITHM */
@@ -22,15 +22,19 @@ public:
         RDom r(0, ksize,               0, ksize);
 
         kernel(x,y) = 0;
-        kernel(0,0) = 17;      kernel(0,1) = 4;      kernel(0,2) = 6;
-        kernel(1,0) = 7;      kernel(1,1) = 19;       kernel(1,2) = 4;
-        kernel(2,0) = 5;      kernel(2,1) = 21;      kernel(2,2) = 15;
+        kernel(0,0) = 1;      kernel(0,1) = 2;      kernel(0,2) = 1;
+        kernel(1,0) = 2;      kernel(1,1) = 4;       kernel(1,2) = 2;
+        kernel(2,0) = 1;      kernel(2,1) = 2;      kernel(2,2) = 1;
+        // kernel(0,0) = 0;      kernel(0,1) = 0;      kernel(0,2) = 0;
+        // kernel(1,0) = 0;      kernel(1,1) = 1;       kernel(1,2) = 0;
+        // kernel(2,0) = 0;      kernel(2,1) = 0;      kernel(2,2) = 0;
 
         conv(x, y) = 0;
 
         Func hw_input("hw_input");
         hw_input(x, y) = cast<uint16_t>(input(x, y));
         conv(x, y)  += kernel(r.x, r.y) * hw_input(x + r.x, y + r.y);
+        conv(x,y) = conv(x,y) >> 4;
         //conv(x,y) =
         //  kernel(0,0)*hw_input(x,y) +
         //  kernel(1,0)*hw_input(x+1,y) +
