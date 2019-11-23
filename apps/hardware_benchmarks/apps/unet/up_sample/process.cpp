@@ -11,14 +11,14 @@ using namespace Halide::Runtime;
 
 int main(int argc, char **argv) {
 
-    Buffer<int8_t> input(20, 20, 128);
+    Buffer<uint8_t> input(20, 20, 128);
     Buffer<uint8_t> output(40, 40, 128);
 
 
     for (int c = 0; c < input.channels(); c++)
     for (int h = 0; h < input.height(); h++)
     for (int w = 0; w < input.width(); w++) {
-      input(w, h, c) = (int8_t)rand();
+      input(w, h, c) = (uint8_t)rand();
     }
     
 

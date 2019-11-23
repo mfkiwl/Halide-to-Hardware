@@ -65,9 +65,9 @@ public:
 
         output(x, y, z) = hw_output(x, y, z);
 
-        output.bound(x, 0, 32);
-        output.bound(y, 0, 32);
-        output.bound(z, 0, 4);
+        output.bound(x, 0, 27);
+        output.bound(y, 0, 27);
+        output.bound(z, 0, 16);
 
         /* THE SCHEDULE */
         if (get_target().has_feature(Target::CoreIR)) {

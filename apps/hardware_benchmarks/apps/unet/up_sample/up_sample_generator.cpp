@@ -6,7 +6,7 @@ using namespace Halide;
 
 class NearestNeighborKernel : public Halide::Generator<NearestNeighborKernel> {
 public:
-    Input<Buffer<int8_t>>  input{"input", 3};
+    Input<Buffer<uint8_t>>  input{"input", 3};
     Output<Buffer<uint8_t>> output{"output", 3};
 
     void generate() {
@@ -20,7 +20,7 @@ public:
         Func nearest_neighbor("nearest_neighbor");
 
         Func hw_input("hw_input");
-        hw_input(x, y, z) = cast<int16_t>(input(x, y, z));
+        hw_input(x, y, z) = cast<uint16_t>(input(x, y, z));
 
         nearest_neighbor(x, y, z) = hw_input(x / factor, y / factor, z);
 
