@@ -25,6 +25,7 @@
 
 #define COREMK(ctx, v) CoreIR::Const::make((ctx), (v))
 
+// Minor merge
 namespace Halide {
 namespace Internal {
 
