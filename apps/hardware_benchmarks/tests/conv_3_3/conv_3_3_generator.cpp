@@ -10,6 +10,8 @@ public:
     Output<Buffer<uint8_t>> output{"output", 2};
 
   int ksize = 3;
+  int unrollsize = 3;
+  int tilesize = 16;
   int imgsize = 62;
 
     void generate() {
@@ -19,7 +21,7 @@ public:
 
         Func kernel("kernel");
         Func conv("conv");
-        RDom r(0, ksize,               0, ksize);
+        RDom r(0, ksize, 0, ksize);
 
         kernel(x,y) = 0;
         kernel(0,0) = 1;      kernel(0,1) = 2;      kernel(0,2) = 1;
@@ -69,12 +71,12 @@ public:
           hw_input.compute_root();
           hw_output.compute_root();
 
-          hw_output.tile(x,y, xo,yo, xi,yi, imgsize, imgsize)
+          hw_output.tile(x,y, xo,yo, xi,yi, tilesize, tilesize)
             .hw_accelerate(xi, xo);
 
           conv.update()
-            .unroll(r.x, ksize)
-            .unroll(r.y, ksize);
+            .unroll(r.x, unrollsize)
+            .unroll(r.y, unrollsize);
 
           conv.linebuffer();
           //hw_input.linebuffer();

@@ -143,7 +143,7 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
   auto max_runtime = 0.0;
   auto first_runtime = 0.0;
 
-  for (int i=0; i < 100; i++) {
+  for (int i=0; i < 1; i++) {
     // timing
     auto t1 = std::chrono::high_resolution_clock::now();
 
@@ -161,7 +161,7 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
       first_runtime = duration;
     }
     else {
-      average_runtime += duration/100.0;
+      average_runtime += duration/1.0;
     }
   }
 
@@ -174,10 +174,10 @@ int OneInOneOut_ProcessController<T>::make_run_def(std::vector<std::string> args
   std::cout << " Max runtime: " << max_runtime << " nanoseconds\n";
   std::cout << " First runtime: " << first_runtime << " nanoseconds\n";
 
-  double min_t_manual = benchmark(100, 5, [&]() {
-      run_call();
-  });
-  printf("benchmark time: %gms\n", min_t_manual * 1e3);
+  // double min_t_manual = benchmark(100, 5, [&]() {
+  //     run_call();
+  // });
+  // printf("benchmark time: %gms\n", min_t_manual * 1e3);
 
   return 0;
 

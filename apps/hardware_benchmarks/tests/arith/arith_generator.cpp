@@ -9,6 +9,8 @@ public:
     Input<Buffer<uint8_t>>  input{"input", 2};
     Output<Buffer<uint8_t>> output{"output", 2};
 
+    int tilesize = 30;
+
     void generate() {
         /* THE ALGORITHM */
 
@@ -38,8 +40,9 @@ public:
           output.bound(x, 0, 64);
           output.bound(y, 0, 64);
           
-          hw_output.tile(x,y, xo,yo, xi,yi, 64, 64)
-            .hw_accelerate(xi, xo);
+          // hw_output.tile(x,y, xo,yo, xi,yi, tilesize, tilesize)
+          //   .hw_accelerate(xi, xo);
+          hw_output.hw_accelerate(x);
 
           hw_input.stream_to_accelerator();
           
