@@ -1792,8 +1792,8 @@ void small_conv_3_3_test() {
   // Generate CoreIR
   auto context = hwContext();
   vector<Argument> args{input};
-  //auto m = buildModule(context, "coreir_conv_3_3", args, "conv_3_3", hw_output);
-  auto m = buildModule(true, context, "coreir_conv_3_3", args, "conv_3_3", output);
+  auto m = buildModule(context, "coreir_conv_3_3", args, "conv_3_3", hw_output);
+  //auto m = buildModule(true, context, "coreir_conv_3_3", args, "conv_3_3", output);
   cout << "Module = " << endl;
   m->print();
 
@@ -3193,8 +3193,8 @@ void arith_test() {
 int main(int argc, char **argv) {
   //small_conv_3_3_not_unrolled_test();
   //assert(false);
-  //small_conv_3_3_test();
-  //assert(false);
+  small_conv_3_3_test();
+  assert(false);
   //
   small_conv_3_3_critical_path_test();
   control_path_test();

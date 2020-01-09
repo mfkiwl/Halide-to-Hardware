@@ -299,7 +299,7 @@ class ROMReadOptimizer : public IRMutator {
     cout << "After ROM simplification..." << endl;
     cout << replaced << endl;
 
-    //internal_assert(false) << "Stopping so dillon can view\n";
+    internal_assert(false) << "Stopping so dillon can view\n";
     return replaced;
   }
 
