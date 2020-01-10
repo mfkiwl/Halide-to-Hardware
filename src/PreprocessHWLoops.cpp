@@ -1,12 +1,13 @@
 #include "PreprocessHWLoops.h"
 
+#include "coreir.h"
+
 #include "IRMutator.h"
 #include "Simplify.h"
 #include "RemoveTrivialForLoops.h"
 #include "HWUtils.h"
 #include "UnrollLoops.h"
 
-#include "coreir.h"
 
 using namespace std;
 using namespace CoreIR;
