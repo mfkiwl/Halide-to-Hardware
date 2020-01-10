@@ -25,6 +25,8 @@
 
 #define COREMK(ctx, v) CoreIR::Const::make((ctx), (v))
 
+// A pointless comment to trigger a build
+//
 namespace Halide {
 namespace Internal {
 
