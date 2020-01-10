@@ -164,10 +164,8 @@ class MemoryInfoCollector : public IRGraphVisitor {
     bool isInnermostLoop(const For* f);
     Stmt preprocessHWLoops(const Stmt& stmt);
 
-    Stmt constant_fold_rom_buffers(const Stmt& stmt);
   }
 }
-
 
 #endif
 

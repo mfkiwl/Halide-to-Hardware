@@ -6086,7 +6086,6 @@ CoreIR::Module* createCoreIRForStmt(CoreIR::Context* context,
     kernelN++;
   }    
 
-  // Tiny irrelevant change to check if auto-builds are triggered
   functions = mapFunctionsToCGRA(functions);
   auto def = topMod->newModuleDef();
 
