@@ -224,6 +224,20 @@ namespace Halide {
           def->addInstance(ub.first + "_ubuffer", ub.second.mod);
         }
 
+        for (auto pn : cu.outputs) {
+          const Provide* c = pn.first;
+          int compute_num = pn.second;
+          for (auto ub : ubuffers) {
+            cout << "Checking ubuffer: " << ub.first << endl;
+            for (auto rp : ub.second.writePorts) {
+              if (rp.second == c) {
+                auto ubInst = def->sel(ub.first + "_ubuffer");
+                cn(ubInst->sel(rp.first), compute_unit->sel("compute_result_stencil")->sel(compute_num)->sel(0));
+              }
+            }
+          }
+        }
+
         for (auto pn : cu.inputs) {
           const Call* c = pn.first;
           int compute_num = pn.second;
@@ -241,7 +255,7 @@ namespace Halide {
 
         cout << "Application..." << endl;
         m->print();
-        internal_assert(false);
+        //internal_assert(false);
       }
 
       deleteContext(context);

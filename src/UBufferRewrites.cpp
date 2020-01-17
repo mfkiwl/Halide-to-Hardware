@@ -351,7 +351,7 @@ namespace Halide {
           }
           return;
         } else {
-          internal_assert(buffer.write_ports.size() == 1);
+          //internal_assert(buffer.write_ports.size() == 1);
 
           string wp = begin(buffer.write_ports)->first;
 
@@ -520,9 +520,9 @@ synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& en
 
   for (auto f : env) {
     if (f.second.schedule().is_accelerated() ||
-        f.second.schedule().is_accelerator_input()) {
+        f.second.schedule().is_accelerator_input() ||
         //f.second.schedule().is_accelerator_input() ||
-        //f.second.schedule().is_hw_kernel()) {
+        f.second.schedule().is_hw_kernel()) {
 
       cout << "Buffer for " << f.first << endl;
       internal_assert(contains_key(f.first, buffers)) << f.first << " was not found in memory analysis\n";
@@ -556,6 +556,7 @@ synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& en
       ub->setDef(def);
       wrappers[buf.name] = {ub};
       wrappers[buf.name].readPorts = buf.read_ports;
+      wrappers[buf.name].writePorts = buf.write_ports;
       //, buf.write_ports};
     } else {
       cout << f.first << " is not accelerated" << endl;
