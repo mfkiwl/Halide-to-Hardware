@@ -500,9 +500,11 @@ namespace Halide {
     //internal_assert(false) << "Cannot classify buffer: " << buffer.name << "\n";
   }
 
-map<string, CoreIR::Module*>
+map<string, HWBufferWrapper>
 synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& env, std::vector<HWXcel>& xcels) {
   Stmt simple = simplify(remove_trivial_for_loops(simplify(unroll_loops(simplify(stmt)))));
+
+  map<string, HWBufferWrapper> wrappers;
 
   cout << "Doing rewrites for" << endl;
   cout << simple << endl;
@@ -551,6 +553,7 @@ synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& en
       auto def = ub->newModuleDef();
       synthesize_ubuffer(def, buf);
       ub->setDef(def);
+      wrappers[buf.name] = {ub};
     } else {
       cout << f.first << " is not accelerated" << endl;
       //internal_assert(!f.second.schedule().is_hw_kernel());
@@ -562,9 +565,9 @@ synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& en
     cout << "Could not save ubuffers" << endl;
     context->die();
   }
-  deleteContext(context);
+  //deleteContext(context);
 
-  return {};
+  return wrappers;
 
 }
 

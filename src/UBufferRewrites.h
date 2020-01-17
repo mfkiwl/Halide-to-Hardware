@@ -9,7 +9,15 @@
 
 namespace Halide {
   namespace Internal {
-    std::map<std::string, CoreIR::Module*>
+
+    class HWBufferWrapper {
+      public:
+        CoreIR::Module* mod;
+        std::map<string, const Provide*> writePorts;
+        std::map<string, const Call*> readPorts;
+    };
+
+    std::map<std::string, HWBufferWrapper>
     synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& env, std::vector<HWXcel>& xcels);
   }
 }
