@@ -8,15 +8,6 @@
 namespace Halide {
   namespace Internal {
 
-    static CoreIR::Context* active_ctx;
-    static CoreIR::ModuleDef* active_def;
-
-    static inline
-    void set_coreir_ctx(CoreIR::ModuleDef* def) {
-      active_def = def;
-      active_ctx = def->getContext();
-    }
-
     template<typename TOut, typename T>
       TOut* sc(T* p) {
         return static_cast<TOut*>(p);
@@ -24,6 +15,8 @@ namespace Halide {
 
     void loadHalideLib(CoreIR::Context* context);
 
+    CoreIR::Context* get_coreir_ctx();
+    CoreIR::ModuleDef* get_coreir_def();
     std::string coreStr(const CoreIR::Type* w);
     std::string coreStr(const CoreIR::Wireable* w);
 

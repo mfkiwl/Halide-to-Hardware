@@ -5,9 +5,9 @@
 #include "coreir/libs/commonlib.h"
 #include "coreir/libs/float.h"
 
+#include "CoreIR_Libs.h"
 #include "CodeGen_CoreIR_Target.h"
 #include "CodeGen_CoreHLS.h"
-
 #include "Closure.h"
 #include "IRMutator.h"
 #include "Simplify.h"
@@ -106,9 +106,8 @@ namespace Halide {
     };
     
     ComputeUnit generate_compute_unit(Stmt& simple, std::map<std::string, Function>& env) {
-      CoreIR::Context* context = newContext();
-      loadHalideLib(context);
-      CoreIRLoadLibrary_commonlib(context);
+      //internal_assert(active_ctx != nullptr);
+      auto context = get_coreir_ctx();
       auto ns = context->getNamespace("global");
 
       string hw_name = "";
@@ -201,12 +200,26 @@ namespace Halide {
       cout << "Simplified code for stmt:" << endl;
       cout << simple << endl;
 
+      CoreIR::Context* context = newContext();
+      internal_assert(context != nullptr);
+
+      CoreIRLoadLibrary_commonlib(context);
+      loadHalideLib(context);
+
+      coreir_builder_set_context(context);
+
+      //cout << "active_ctx = " << active_ctx << endl;
+      //internal_assert(active_ctx != nullptr);
+
       synthesize_hwbuffers(simple, env, buf_xcels);
       ComputeUnit cu = generate_compute_unit(simple, env);
       if (cu.mod != nullptr) {
         cout << "Compute unit..." << endl;
         cu.mod->print();
       }
+
+      //active_ctx = nullptr;
+      deleteContext(context);
     }
 
 

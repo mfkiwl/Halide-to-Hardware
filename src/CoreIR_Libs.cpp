@@ -8,8 +8,29 @@ using namespace CoreIR;
 namespace Halide {
   namespace Internal {
 
+    static CoreIR::Context* active_ctx;
+    static CoreIR::ModuleDef* active_def;
+
+    static inline
+    void set_coreir_ctx(CoreIR::ModuleDef* def) {
+      active_def = def;
+      active_ctx = def->getContext();
+    }
+
+    CoreIR::ModuleDef* get_coreir_def() {
+      internal_assert(active_def != nullptr);
+      return active_def;
+    }
+
+    CoreIR::Context* get_coreir_ctx() {
+      internal_assert(active_ctx != nullptr);
+      return active_ctx;
+    }
+
     void coreir_builder_set_context(CoreIR::Context* context) {
       active_ctx = context;
+      cout << "active_ctx = " << active_ctx << endl;
+      internal_assert(active_ctx != nullptr);
     }
 
     void coreir_builder_set_def(CoreIR::ModuleDef* def) {

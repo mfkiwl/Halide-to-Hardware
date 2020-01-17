@@ -312,6 +312,8 @@ namespace Halide {
   };
 
   void synthesize_ubuffer(CoreIR::ModuleDef* def, MemoryConstraints& buffer) {
+    //internal_assert(active_ctx != nullptr);
+
     if (buffer.read_ports.size() == 0) {
       // Buffer is write only, so it has no effect
       return;
@@ -353,7 +355,6 @@ namespace Halide {
 
           string wp = begin(buffer.write_ports)->first;
 
-          coreir_builder_set_context(def->getContext());
           coreir_builder_set_def(def);
 
           auto wen = self->sel(wp + "_en");
@@ -513,8 +514,8 @@ synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& en
   simple.accept(&mic);
   auto buffers = mic.hwbuffers();
 
-  CoreIR::Context* context = newContext();
-  CoreIRLoadLibrary_commonlib(context);
+  auto context = get_coreir_ctx();
+  internal_assert(context != nullptr);
   auto ns = context->getNamespace("global");
 
   for (auto f : env) {
