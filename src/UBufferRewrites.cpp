@@ -555,6 +555,8 @@ synthesize_hwbuffers(const Stmt& stmt, const std::map<std::string, Function>& en
       synthesize_ubuffer(def, buf);
       ub->setDef(def);
       wrappers[buf.name] = {ub};
+      wrappers[buf.name].readPorts = buf.read_ports;
+      //, buf.write_ports};
     } else {
       cout << f.first << " is not accelerated" << endl;
       //internal_assert(!f.second.schedule().is_hw_kernel());

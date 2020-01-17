@@ -100,15 +100,14 @@ namespace Halide {
     class ComputeUnit {
       public:
         CoreIR::Module* mod;
-        std::map<const Variable*, CoreIR::Wireable*> vars;
-        std::map<const Call*, CoreIR::Wireable*> inputs;
-        std::map<const Provide*, CoreIR::Wireable*> outputs;
+        std::map<const Call*, int> inputs;
+        std::map<const Provide*, int> outputs;
     };
     
     ComputeUnit generate_compute_unit(Stmt& simple, std::map<std::string, Function>& env) {
       //internal_assert(active_ctx != nullptr);
       auto context = get_coreir_ctx();
-      auto ns = context->getNamespace("global");
+      //auto ns = context->getNamespace("global");
 
       string hw_name = "";
       for (auto f : env) {
@@ -121,9 +120,9 @@ namespace Halide {
       if (hw_name != "") {
         internal_assert(hw_name != "") << "No function to accelerate\n";
 
-        RecordType* mtp = context->Record({{"clk", context->Named("coreir.clkIn")}, {"rst", context->BitIn()}});
-        auto m = ns->newModuleDecl("m", mtp);
-        auto mDef = m->newModuleDef();
+        //RecordType* mtp = context->Record({{"clk", context->Named("coreir.clkIn")}, {"rst", context->BitIn()}});
+        //auto m = ns->newModuleDecl("m", mtp);
+        //auto mDef = m->newModuleDef();
 
         ProduceFinder rFinder(hw_name);
         simple->accept(&rFinder);
@@ -176,13 +175,13 @@ namespace Halide {
         //internal_assert(interface.buffers.size() == 0);
         auto compute_unit =
           createCoreIRForStmt(context, info, compute_only, "compute_unit", compute_args);
-        mDef->addInstance("compute_unit", compute_unit);
+        //mDef->addInstance("compute_unit", compute_unit);
 
 
-        m->setDef(mDef);
-        cout << "Output module" << endl;
-        m->print();
-        return {m};
+        //m->setDef(mDef);
+        //cout << "Output module" << endl;
+        //m->print();
+        return {compute_unit, ce.callNums, ce.provideNums};
       }
 
 
@@ -219,16 +218,30 @@ namespace Halide {
         cu.mod->print();
 
         auto def = m->newModuleDef();
-        def->addInstance("compute_unit", cu.mod);
+        coreir_builder_set_def(def);
+        auto compute_unit = def->addInstance("compute_unit", cu.mod);
         for (auto ub : ubuffers) {
           def->addInstance(ub.first + "_ubuffer", ub.second.mod);
+        }
+
+        for (auto pn : cu.inputs) {
+          const Call* c = pn.first;
+          int compute_num = pn.second;
+          for (auto ub : ubuffers) {
+            for (auto rp : ub.second.readPorts) {
+              if (rp.second == c) {
+                auto ubInst = def->sel(ub.first + "_ubuffer");
+                cn(ubInst->sel(rp.first), compute_unit->sel("compute_input_stencil")->sel(compute_num)->sel(0));
+              }
+            }
+          }
         }
 
         m->setDef(def);
 
         cout << "Application..." << endl;
         m->print();
-        //internal_assert(false);
+        internal_assert(false);
       }
 
       deleteContext(context);
