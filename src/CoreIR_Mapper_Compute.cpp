@@ -105,14 +105,7 @@ namespace Halide {
         std::map<const Provide*, CoreIR::Wireable*> outputs;
     };
     
-    ComputeUnit generate_compute_unit(Stmt& stmt, std::map<std::string, Function>& env) {
-      auto pre_simple = simplify(stmt);
-      cout << "Pre simplification..." << endl;
-      cout << pre_simple << endl;
-      Stmt simple = simplify(remove_trivial_for_loops(simplify(unroll_loops(pre_simple))));
-      cout << "Simplified code for stmt:" << endl;
-      cout << simple << endl;
-
+    ComputeUnit generate_compute_unit(Stmt& simple, std::map<std::string, Function>& env) {
       CoreIR::Context* context = newContext();
       loadHalideLib(context);
       CoreIRLoadLibrary_commonlib(context);
@@ -198,11 +191,18 @@ namespace Halide {
       return {nullptr};
     }
 
-    void generate_mapped_buffers(Stmt& s,
+    void generate_mapped_buffers(Stmt& stmt,
         std::map<std::string, Function>& env,
         std::vector<HWXcel>& buf_xcels) {
-      synthesize_hwbuffers(s, env, buf_xcels);
-      ComputeUnit cu = generate_compute_unit(s, env);
+      auto pre_simple = simplify(stmt);
+      cout << "Pre simplification..." << endl;
+      cout << pre_simple << endl;
+      Stmt simple = simplify(remove_trivial_for_loops(simplify(unroll_loops(pre_simple))));
+      cout << "Simplified code for stmt:" << endl;
+      cout << simple << endl;
+
+      synthesize_hwbuffers(simple, env, buf_xcels);
+      ComputeUnit cu = generate_compute_unit(simple, env);
       if (cu.mod != nullptr) {
         cout << "Compute unit..." << endl;
         cu.mod->print();
