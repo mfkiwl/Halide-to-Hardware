@@ -13,6 +13,7 @@
 #include "Simplify.h"
 #include "RemoveTrivialForLoops.h"
 #include "HWUtils.h"
+#include "UBufferRewrites.h"
 #include "UnrollLoops.h"
 
 using namespace std;
@@ -95,6 +96,13 @@ namespace Halide {
           return Evaluate::make(0);
         }
     };
+    
+    void generate_mapped_buffers(Stmt& s,
+        std::map<std::string, Function>& env,
+        std::vector<HWXcel>& buf_xcels) {
+      synthesize_hwbuffers(s, env, buf_xcels);
+      generate_compute_unit(s, env);
+    }
 
     void generate_compute_unit(Stmt& stmt, std::map<std::string, Function>& env) {
       auto pre_simple = simplify(stmt);

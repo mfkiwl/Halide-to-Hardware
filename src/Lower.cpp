@@ -226,8 +226,7 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
     if (t.has_feature(Target::CoreIR)) {
       vector<HWXcel> buf_xcels =
         extract_hw_accelerators(s, env, inlined_stages);
-      synthesize_hwbuffers(s, env, buf_xcels);
-      generate_compute_unit(s, env);
+      generate_mapped_buffers(s, env, buf_xcels);
     }
 
     //cout << "Should use ubuffer ? " << use_ubuffer << endl;
