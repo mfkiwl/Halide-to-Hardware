@@ -205,17 +205,30 @@ namespace Halide {
 
       CoreIRLoadLibrary_commonlib(context);
       loadHalideLib(context);
+      auto ns = context->getNamespace("global");
 
       coreir_builder_set_context(context);
 
-      //cout << "active_ctx = " << active_ctx << endl;
-      //internal_assert(active_ctx != nullptr);
-
-      synthesize_hwbuffers(simple, env, buf_xcels);
+      auto ubuffers = synthesize_hwbuffers(simple, env, buf_xcels);
       ComputeUnit cu = generate_compute_unit(simple, env);
       if (cu.mod != nullptr) {
+        vector<pair<string, CoreIR::Type*> > tps = {{"clk", context->Named("coreir.clkIn")}, {"rst", context->BitIn()}};
+        auto tp = context->Record(tps);
+        auto m = ns->newModuleDecl("ubuffer_app", tp);
         cout << "Compute unit..." << endl;
         cu.mod->print();
+
+        auto def = m->newModuleDef();
+        def->addInstance("compute_unit", cu.mod);
+        for (auto ub : ubuffers) {
+          def->addInstance(ub.first + "_ubuffer", ub.second.mod);
+        }
+
+        m->setDef(def);
+
+        cout << "Application..." << endl;
+        m->print();
+        internal_assert(false);
       }
 
       //active_ctx = nullptr;
