@@ -17,6 +17,7 @@
 #include "BoundsInference.h"
 #include "CSE.h"
 #include "CanonicalizeGPUVars.h"
+#include "CoreIR_Mapper_Compute.h"
 #include "Debug.h"
 #include "DebugArguments.h"
 #include "DebugToFile.h"
@@ -226,6 +227,7 @@ Module lower(const vector<Function> &output_funcs, const string &pipeline_name, 
       vector<HWXcel> buf_xcels =
         extract_hw_accelerators(s, env, inlined_stages);
       synthesize_hwbuffers(s, env, buf_xcels);
+      generate_compute_unit(s, env);
     }
 
     //cout << "Should use ubuffer ? " << use_ubuffer << endl;

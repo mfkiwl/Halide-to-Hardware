@@ -157,7 +157,6 @@ namespace Halide {
             cout << "\t" << pr.second << endl;
           }
           cout << "compute st nums       = " << ce.st_inst << endl;
-          //internal_assert(((int) ce.provideNums.size()) == (ce.st_inst));
           Range outRng(Expr((int) 0), outLen);
           Stencil_Type outTp{Stencil_Type::StencilContainerType::AxiStream,
             Int(16),
@@ -166,14 +165,12 @@ namespace Halide {
           compute_args.push_back({"compute_result.stencil", true, true, Int(16), outTp});
           Closure interface;
           compute_only.accept(&interface);
-          //rFinder.r->body.accept(&interface);
           cout << "Interface..." << endl;
           cout << "\tExternal vars..." << endl;
           for (auto v : interface.vars) {
             cout << "\t\t" << v.first << endl;
             compute_args.push_back({v.first, false, false, v.second, outTp});
           }
-          //internal_assert(interface.vars.size() == 0);
 
           //cout << "\t# external buffers = " << interface.buffers.size() << endl;
           //internal_assert(interface.buffers.size() == 0);
