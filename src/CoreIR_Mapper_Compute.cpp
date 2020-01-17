@@ -228,10 +228,9 @@ namespace Halide {
 
         cout << "Application..." << endl;
         m->print();
-        internal_assert(false);
+        //internal_assert(false);
       }
 
-      //active_ctx = nullptr;
       deleteContext(context);
     }
 
