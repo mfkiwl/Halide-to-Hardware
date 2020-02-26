@@ -1,3 +1,6 @@
+echo 'Running cascade'
+./test/scripts/run_app.sh cascade
+
 echo 'Running gaussian'
 ./test/scripts/run_app.sh gaussian
 
