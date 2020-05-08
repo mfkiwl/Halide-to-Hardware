@@ -168,6 +168,10 @@ run-coreir $(BIN)/output_coreir.png: $(BIN)/process $(BIN)/design_top.json
 	@-mkdir -p $(BIN)
 	$(BIN)/process run coreir input.png $(HALIDE_DEBUG_REDIRECT)
 
+design-rewrite: $(BIN)/process $(BIN)/design_top.json
+	@-mkdir -p $(BIN)
+	$(BIN)/process run gen_rewrite $(HALIDE_DEBUG_REDIRECT)
+
 run-rewrite $(BIN)/output_rewrite.png: $(BIN)/process $(BIN)/design_top.json
 	@-mkdir -p $(BIN)
 	$(BIN)/process run rewrite input.png $(HALIDE_DEBUG_REDIRECT)

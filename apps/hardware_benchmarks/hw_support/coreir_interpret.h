@@ -33,6 +33,8 @@ private:
 
 bool reset_coreir_circuit(CoreIR::SimulatorState &state, CoreIR::Module *m);
 
+CoreIR::Module* substitute_rewrite_module(std::string coreir_design, std::string rewrite_buf);
+
 template<typename T>
 void run_coreir_on_interpreter(std::string coreir_design,
                                Halide::Runtime::Buffer<T> input,

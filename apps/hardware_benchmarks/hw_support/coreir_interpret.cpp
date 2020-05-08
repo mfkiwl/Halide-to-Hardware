@@ -408,7 +408,7 @@ void run_for_cycle(CoordinateVector<int>& writeIdx,
 
     // give another rising edge (execute seq)
     state.exeSequential();
-    
+
   } else {
     state.execute();
     //if (std::is_floating_point<T>::value) {
@@ -466,15 +466,8 @@ std::string vec2string(vector<string> vec, string sep, size_t begin, size_t end)
     return ret;
 }
 
-template<typename T>
-void run_coreir_rewrite_on_interpreter(string coreir_design,
-                               string rewrite_buf,
-                               Halide::Runtime::Buffer<T> input,
-                               Halide::Runtime::Buffer<T> output,
-                               string input_name,
-                               string output_name,
-                               bool has_float_input,
-                               bool has_float_output) {
+Module* substitute_rewrite_module(string coreir_design, string rewrite_buf) {
+
     Context* c = newContext();
     Namespace* g = c->getGlobal();
     CoreIRLoadLibrary_commonlib(c);
@@ -552,6 +545,10 @@ void run_coreir_rewrite_on_interpreter(string coreir_design,
                 moddef->connect(buf_ins->sel("read_port_"+stream_name+"_0_valid"), pt->sel("in"));
                 inlineInstance(pt);
             }
+            /*else if (pt_name_list.front() == "reset") {
+                moddef->connect(buf_ins->sel("reset"), pt->sel("in"));
+                inlineInstance(pt);
+            }*/
             else {
                 moddef->connect(buf_ins->sel(itr_sel.first), pt->sel("in"));
                 inlineInstance(pt);
@@ -565,7 +562,27 @@ void run_coreir_rewrite_on_interpreter(string coreir_design,
     }
     moddef->print();
     c->runPasses({"rungenerators", "flattentypes", "flatten", "wireclocks-coreir"});
-    run_coreir_module_on_interpreter<T>(m, input, output, input_name, output_name, has_float_input, has_float_output);
+    if (!saveToFile(g, "bin/design_rewrite.json", m)) {
+      cout << "Could not save to json!!" << endl;
+      c->die();
+    }
+
+    cout << "Successfully generate rewrite in /bin/design-rewrite.json" << endl;
+
+    return m;
+}
+
+template<typename T>
+void run_coreir_rewrite_on_interpreter(string coreir_design,
+                               string rewrite_buf,
+                               Halide::Runtime::Buffer<T> input,
+                               Halide::Runtime::Buffer<T> output,
+                               string input_name,
+                               string output_name,
+                               bool has_float_input,
+                               bool has_float_output) {
+    auto rewrite_module = substitute_rewrite_module(coreir_design, rewrite_buf);
+    run_coreir_module_on_interpreter<T>(rewrite_module, input, output, input_name, output_name, has_float_input, has_float_output);
 
     cout << "Finished" << endl;
 
