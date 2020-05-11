@@ -2844,13 +2844,6 @@ void CodeGen_CoreIR_Target::CodeGen_CoreIR_C::visit_hwbuffer(const Call *op) {
                                                      gens["reshape"],
                                                      input_reshape_args);
 
-  CoreIR::Values output_reshape_args =
-    {{"input_type", CoreIR::Const::make(context, context->Flip(context->Bit()->Arr(bitwidth)->Arr(num_output_ports)))},
-     {"output_type", CoreIR::Const::make(context, output_block_type)}};
-  CoreIR::Wireable* output_reshape = def->addInstance(ub_name + "_out_reshape",
-                                                      gens["reshape"],
-                                                      output_reshape_args);
-
   // go through the reshapes for the consumers
   map<string, CoreIR::Wireable*> output_reshapes;
   map<string, int> map_num_oports;
@@ -2876,12 +2869,12 @@ void CodeGen_CoreIR_Target::CodeGen_CoreIR_C::visit_hwbuffer(const Call *op) {
   bool new_ubuffer = true;
   if (new_ubuffer) {
     auto coreir_ub_inputs = get_wires(coreir_ub, {(size_t)num_input_ports}, "datain_input_");
-    auto coreir_ub_outputs = get_wires(coreir_ub, {(size_t)num_output_ports}, "dataout_"+output_name+"_");
+    //auto coreir_ub_outputs = get_wires(coreir_ub, {(size_t)num_output_ports}, "dataout_"+output_name+"_");
     auto coreir_reshape_for_inputs = get_wires(input_reshape->sel("out"), {(size_t)num_input_ports});
-    auto coreir_reshape_for_outputs = get_wires(output_reshape->sel("in"), {(size_t)num_output_ports});
+    //auto coreir_reshape_for_outputs = get_wires(output_reshape->sel("in"), {(size_t)num_output_ports});
 
     connect_wires(def, coreir_ub_inputs, coreir_reshape_for_inputs);
-    connect_wires(def, coreir_ub_outputs, coreir_reshape_for_outputs);
+    //connect_wires(def, coreir_ub_outputs, coreir_reshape_for_outputs);
 
     for (auto consumer_name : consumer_names) {
       auto num_output_ports = map_num_oports.at(consumer_name);
@@ -2893,16 +2886,32 @@ void CodeGen_CoreIR_Target::CodeGen_CoreIR_C::visit_hwbuffer(const Call *op) {
     }
 
   } else if (simulation_compatible) {
+    CoreIR::Values output_reshape_args =
+      {{"input_type", CoreIR::Const::make(context, context->Flip(context->Bit()->Arr(bitwidth)->Arr(num_output_ports)))},
+       {"output_type", CoreIR::Const::make(context, output_block_type)}};
+    CoreIR::Wireable* output_reshape = def->addInstance(ub_name + "_out_reshape",
+                                                        gens["reshape"],
+                                                        output_reshape_args);
+
     auto coreir_ub_inputs = get_wires(coreir_ub, {(size_t)num_input_ports}, "datain");
     auto coreir_ub_outputs = get_wires(coreir_ub, {(size_t)num_output_ports}, "dataout");
     auto coreir_reshape_for_inputs = get_wires(input_reshape->sel("out"), {(size_t)num_input_ports});
     auto coreir_reshape_for_outputs = get_wires(output_reshape->sel("in"), {(size_t)num_output_ports});
     connect_wires(def, coreir_ub_inputs, coreir_reshape_for_inputs);
     connect_wires(def, coreir_ub_outputs, coreir_reshape_for_outputs);
+    add_wire(ub_out_name, output_reshape->sel("out"));
 
   } else {
+    CoreIR::Values output_reshape_args =
+      {{"input_type", CoreIR::Const::make(context, context->Flip(context->Bit()->Arr(bitwidth)->Arr(num_output_ports)))},
+       {"output_type", CoreIR::Const::make(context, output_block_type)}};
+    CoreIR::Wireable* output_reshape = def->addInstance(ub_name + "_out_reshape",
+                                                        gens["reshape"],
+                                                        output_reshape_args);
+
     def->connect(input_reshape->sel("out"), coreir_ub->sel("datain"));
     def->connect(coreir_ub->sel("dataout"), output_reshape->sel("in"));
+    add_wire(ub_out_name, output_reshape->sel("out"));
 
   }
 
@@ -2932,7 +2941,6 @@ void CodeGen_CoreIR_Target::CodeGen_CoreIR_C::visit_hwbuffer(const Call *op) {
   CoreIR::Wireable* ub_in_wire = get_wire(ub_in_name, op->args[0]);
 
   def->connect(ub_in_wire, input_reshape->sel("in"));
-  add_wire(ub_out_name, output_reshape->sel("out"));
 
   if (!connected_wen) {
     CoreIR::Wireable* ub_wen = def->addInstance(ub_name+"_wen", gens["bitconst"], {{"value",CoreIR::Const::make(context,true)}});
