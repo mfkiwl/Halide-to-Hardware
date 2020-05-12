@@ -103,6 +103,9 @@ int main(int argc, char **argv) {
                                                   [&]() { run_coreir_rewrite_on_interpreter<>("bin/design_top.json", "bin/ubuffers.json", processor.input, processor.output,
                                                                                       "self.in_arg_1_0_0", "self.out_0_0"); }
                                               },
+                                              {"gen_rewrite",
+                                                [&]() { substitute_rewrite_module("bin/design_top.json", "bin/ubuffers.json"); }
+                                              },
                                               {"coreir",
                                                   [&]() { run_coreir_on_interpreter<>("bin/design_top.json", processor.input, processor.output,
                                                                                       "self.in_arg_1_0_0", "self.out_0_0"); }
