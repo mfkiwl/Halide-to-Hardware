@@ -561,7 +561,8 @@ Module* substitute_rewrite_module(string coreir_design, string rewrite_buf) {
         moddef->removeInstance(ub_name);
     }
     moddef->print();
-    c->runPasses({"rungenerators", "flattentypes", "flatten", "wireclocks-coreir"});
+    c->runPasses({"deletedeadinstances"});
+    //c->runPasses({"rungenerators", "flattentypes", "flatten", "wireclocks-coreir"});
     if (!saveToFile(g, "bin/design_rewrite.json", m)) {
       cout << "Could not save to json!!" << endl;
       c->die();
