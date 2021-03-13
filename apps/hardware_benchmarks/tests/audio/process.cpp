@@ -1,32 +1,32 @@
 #include <cstdio>
 #include "hardware_process_helper.h"
 #include "halide_image_io.h"
-#include "Halide.h"
 
 #if defined(WITH_CPU)
-   #include "fp_conv_1_1.h"
+   #include "audio.h"
 #endif
 
-#if defined(WITH_COREIR)
-    #include "coreir_interpret.h"
-#endif
+// #if defined(WITH_COREIR)
+    // #include "coreir_interpret.h"
+// #endif
 
-#if defined(WITH_CLOCKWORK)
-    #include "rdai_api.h"
-    #include "clockwork_sim_platform.h"
-    #include "fp_conv_1_1_clockwork.h"
-#endif
+// #if defined(WITH_CLOCKWORK)
+    // #include "rdai_api.h"
+    // #include "clockwork_sim_platform.h"
+    // #include "brighten_and_blur_clockwork.h"
+// #endif
 
+using namespace std;
 using namespace Halide::Tools;
 using namespace Halide::Runtime;
 
 int main( int argc, char **argv ) {
   std::map<std::string, std::function<void()>> functions;
-  OneInOneOut_ProcessController<uint16_t> processor("fp_conv_1_1");
+  ManyInOneOut_ProcessController<int16_t> processor("audio", {"in1.png", "in2.png"});
 
   #if defined(WITH_CPU)
       auto cpu_process = [&]( auto &proc ) {
-        fp_conv_1_1( proc.input, proc.output );
+        audio(proc.inputs["in1.png"], proc.inputs["in2.png"], proc.output);
       };
       functions["cpu"] = [&](){ cpu_process( processor ); } ;
   #endif
@@ -45,7 +45,7 @@ int main( int argc, char **argv ) {
         // RDAI_Platform *rdai_platform = RDAI_register_platform( &rdai_clockwork_sim_ops );
         // if ( rdai_platform ) {
           // printf( "[RUN_INFO] found an RDAI platform\n" );
-          // fp_conv_1_1_clockwork( proc.input, proc.output );
+          // brighten_and_blur_clockwork( proc.input, proc.output );
           // RDAI_unregister_platform( rdai_platform );
         // } else {
           // printf("[RUN_INFO] failed to register RDAI platform!\n");
@@ -56,21 +56,24 @@ int main( int argc, char **argv ) {
 
   // Add all defined functions
   processor.run_calls = functions;
+  processor.inputs["in1.png"] = Buffer<int16_t>(1024, 2);
+  processor.inputs["in2.png"] = Buffer<int16_t>(1024, 2);
+  
+  auto in1 = processor.inputs["in1.png"];
+  auto in2 = processor.inputs["in2.png"];
 
-  processor.input   = Buffer<uint16_t>(100, 3);
-  
-  auto in = processor.input;
-  
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 1024; i++)
   {
-	  for (int j = 0; j < 3; j++)
-	  {
-		  in(i, j) = 10;
-	  }
+	  in1(i, 0) = -22;
+	  in1(i, 1) = -10;
+	  
+	  in2(i, 0) = -10;
+	  in2(i, 1) = -7;
   }
   
-  processor.output  = Buffer<uint16_t>(100, 3);
+  processor.inputs_preset = true;
+  processor.output = Buffer<int16_t>(1024, 2);
+  auto out = processor.process_command(argc, argv);
   
- return processor.process_command(argc, argv);
-  
+  return out;
 }

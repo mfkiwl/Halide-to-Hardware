@@ -33,6 +33,9 @@ bench_48x48: $(BIN)/bench_fft
 
 bench_64x64: $(BIN)/bench_fft
 	$(BIN)/bench_fft 64 64 $(BIN)/
+	
+temp: $(BIN)/bench_fft
+	$(BIN)/bench_fft 128 128 $(BIN)/
 
 $(BIN)/fft.generator: fft_generator.cpp fft.cpp fft.h $(GENERATOR_DEPS)
 	@mkdir -p $(@D)

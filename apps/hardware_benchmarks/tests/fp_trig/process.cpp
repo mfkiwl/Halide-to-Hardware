@@ -56,8 +56,19 @@ int main( int argc, char **argv ) {
   // Add all defined functions
   processor.run_calls = functions;
 
-  processor.input   = Buffer<uint8_t>(64, 64);
-  processor.output  = Buffer<uint8_t>(64, 64);
+  processor.input   = Buffer<uint8_t>(5, 5);
+  
+  auto in = processor.input;
+  
+  for (int i = 0; i < 5; i++)
+  {
+	  for (int j = 0; j < 5; j++)
+	  {
+		  in(i, j) = 29;
+	  }
+  }
+  
+  processor.output  = Buffer<uint8_t>(5, 5);
   
  return processor.process_command(argc, argv);
   
