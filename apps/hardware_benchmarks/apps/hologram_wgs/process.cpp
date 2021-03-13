@@ -3,6 +3,7 @@
 #include <cstdio>
 #include "hardware_process_helper.h"
 #include "halide_image_io.h"
+#include <chrono>
 
 #if defined(WITH_CPU)
    #include "hologram_wgs.h"
@@ -18,12 +19,13 @@
     #include "hologram_wgs_clockwork.h"
 #endif
 
+using namespace std;
 using namespace Halide::Tools;
 using namespace Halide::Runtime;
 
 int main( int argc, char **argv ) {
   std::map<std::string, std::function<void()>> functions;
-  ManyInOneOut_ProcessController<uint8_t> processor("hologram_wgs", {"x.png", "y.png", "z.png"});
+  ManyInOneOut_ProcessController<float> processor("hologram_wgs", {"x.png", "y.png", "z.png"});
 
   #if defined(WITH_CPU)
       auto cpu_process = [&]( auto &proc ) {
@@ -75,5 +77,12 @@ int main( int argc, char **argv ) {
     processor.inputs_preset = true;
     processor.output = Buffer<float>(512, 512);
 
-    return processor.process_command(argc, argv);
+
+	auto start = chrono::steady_clock::now();
+	auto out = processor.process_command(argc, argv);
+	auto end = chrono::steady_clock::now();
+	
+	cout << chrono::duration_cast<chrono::milliseconds>(end - start).count() << " ms" << endl;
+	
+	return out;
 }
