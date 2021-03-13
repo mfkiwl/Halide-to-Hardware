@@ -107,7 +107,7 @@ class FFT512 : public Halide::Generator<FFT512> {
 				.hw_accelerate(xi, xo);
 				
 				
-			  stages.unroll(x, 64);
+			  // stages.unroll(x, 2);
 		      
 			  
 			  hw_twi.stream_to_accelerator();

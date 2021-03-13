@@ -78,14 +78,14 @@ class FFT256 : public Halide::Generator<FFT256> {
 		{
 			int tmp = 1 << s;
 			
-			stages(t.x, (s - 1) % 2) = stages(t.x, (s - 1) % 2) * twi_stages(t.x, s - 1);
+			stages(t.x, s - 1) = stages(t.x, s - 1) * twi_stages(t.x, s - 1);
 			
-			stages(t.x, s % 2) = (1 - 2 * (t.x / ((t.x / tmp) * tmp + tmp / 2))) *
-						     stages(t.x, (s - 1) % 2) +
-						     stages((t.x + tmp / 2) % tmp + (t.x / tmp) * tmp, (s - 1) % 2);
+			stages(t.x, s) = (1 - 2 * (t.x / ((t.x / tmp) * tmp + tmp / 2))) *
+						     stages(t.x, s - 1) +
+						     stages((t.x + tmp / 2) % tmp + (t.x / tmp) * tmp, s - 1);
 		}
 		
-		hw_output(x, y) = select(y == 0, stages(x, 0).x, stages(x, 0).y);
+		hw_output(x, y) = select(y == 0, stages(x, 8).x, stages(x, 8).y);
 		output(x, y) = hw_output(x, y);
 		////////////////////////////////////////////////////////////////////////
 		
@@ -104,7 +104,7 @@ class FFT256 : public Halide::Generator<FFT256> {
 				.tile(x, y, xo, yo, xi, yi, 256, 2)
 				.hw_accelerate(xi, xo);
 				
-			  stages.unroll(x, 64);
+			  // stages.unroll(x, 2);
 		      
 			  
 			  hw_twi.stream_to_accelerator();

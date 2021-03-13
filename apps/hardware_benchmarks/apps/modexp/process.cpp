@@ -50,8 +50,8 @@ int main( int argc, char **argv ) {
   auto c = processor.inputs["c.png"];
   
   a(0) = 3;
-  c(0) = 7;
-  // a^100 % c
+  c(0) = 8;
+  // a^30 % c
   
   processor.inputs_preset = true;
   processor.output = Buffer<uint16_t>(1);

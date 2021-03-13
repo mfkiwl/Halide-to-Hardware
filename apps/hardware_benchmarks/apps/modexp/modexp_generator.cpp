@@ -26,7 +26,7 @@ class modexp : public Halide::Generator<modexp> {
 		
 		for (int i = 0; i < 30; i++)
 		{
-			hw_output(0) = (hw_output(0) * 3) % 7;
+			hw_output(0) = (hw_output(0) * hw_a(0)) % hw_c(0);
 		}
 		
 		output(x) = hw_output(0);

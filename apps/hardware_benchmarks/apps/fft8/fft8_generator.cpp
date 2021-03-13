@@ -62,9 +62,6 @@ class FFT8 : public Halide::Generator<FFT8> {
 		stages(x, y) = ComplexExpr(0.0f, 0.0f); // n * log(n) (8 x 3)
 		stages(x, 0) = ComplexExpr(hw_input(x, 0), hw_input(x, 1));
 		
-		// stages[1](x) =   
-		// stages[2](x) =  
-		// stages[3](x) =  
 		
 		twi_stages(x, z) = ComplexExpr(hw_twi(x, 0, z), hw_twi(x, 1, z));
 		

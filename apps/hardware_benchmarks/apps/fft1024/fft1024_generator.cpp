@@ -82,7 +82,7 @@ class FFT1024 : public Halide::Generator<FFT1024> {
 		{
 			int tmp = 1 << s;
 			
-			stages[s](t.x, s - 1) = stages(t.x, s - 1) * twi_stages(t.x, s - 1);
+			stages(t.x, s - 1) = stages(t.x, s - 1) * twi_stages(t.x, s - 1);
 			
 			stages(t.x, s) = (1 - 2 * (t.x / ((t.x / tmp) * tmp + tmp / 2))) *
 						     stages(t.x, s - 1) +
@@ -109,7 +109,7 @@ class FFT1024 : public Halide::Generator<FFT1024> {
 				.hw_accelerate(xi, xo);
 				
 				
-			  stages.unroll(x, 64);
+			  // stages.unroll(x, 2);
 		      
 			  
 			  hw_twi.stream_to_accelerator();
