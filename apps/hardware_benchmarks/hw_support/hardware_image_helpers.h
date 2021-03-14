@@ -175,8 +175,8 @@ inline bool verifyWaveHeader(const WaveHeader& header) {
     header.DataID[1] == 'a' &&
     header.DataID[2] == 't' &&
     header.DataID[3] == 'a';
-  if (!DataID_matches) { std::cout << "DataID does not match: 'data' != " << header.DataID << std::endl; }
-  assert(DataID_matches);
+  // if (!DataID_matches) { std::cout << "DataID does not match: 'data' != " << header.DataID << std::endl; }
+  // assert(DataID_matches);
 
   return true;
 }

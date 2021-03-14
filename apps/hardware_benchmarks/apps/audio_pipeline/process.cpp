@@ -15,6 +15,7 @@
 
 using namespace Halide::Tools;
 using namespace Halide::Runtime;
+using namespace std;
 
 int main( int argc, char **argv ) {
   std::map<std::string, std::function<void()>> functions;
@@ -44,48 +45,50 @@ int main( int argc, char **argv ) {
 
   // Add all defined functions
   processor.run_calls = functions;
+  
+  
+  AudioFile<int16_t> f1;
+  readAudioData<int16_t>("third.wav", &f1);
+  
+  cout << "*********************************************************" << endl;
+  cout << f1.header << endl;
+  
+  
 
-  // Read wave file
-  AudioFile<int16_t> audioFile;
-  //std::string filename = "love";
-  std::string filename = "distortion";
-  readAudioData<int16_t>(filename + ".wav", &audioFile);
-  std::cout << audioFile.header;
-
-  processor.input   = audioFile.data;
-  auto& in = processor.input;
-  int ksize = 1;
-  processor.output  = Buffer<int16_t>(in.dim(0).extent() - ksize + 1, in.dim(1).extent());
+  processor.input   = f1.data;
+  auto in = processor.input;
+  processor.output  = Buffer<int16_t>(in.dim(0).extent(), in.dim(1).extent());
   processor.inputs_preset = true;
   
-  //int overall_delay = 25;
-  //processor.input   = Buffer<uint8_t>(100 + overall_delay);
-  //for (int i=0; i<processor.input.dim(0).extent(); ++i) {
-  //  processor.input(i) = i;
-  //}
-  //processor.inputs_preset = true;
+  
+  cout << in.dim(0).extent() << "   " << in.dim(1).extent() << endl;
+  cout << "*********************************************************" << endl;
+  
+  
 
   auto ret_value = processor.process_command(argc, argv);
-  //std::cout << "input:" << std::endl;
-  //for (int y=0; y<5; ++y) {
-  //  for (int x=0; x<8; ++x) {
-  //    std::cout << "y=" << y << ",x=" << x << " : " << std::hex << +processor.input(x, y) << std::endl;
-  //  }
-  //}
-  //
-  //std::cout << "output:" << std::endl;
-  //for (int y=0; y<3; ++y) {
-  //  for (int x=0; x<6; ++x) {
-  //    std::cout << "y=" << y << ",x=" << x << " : " << std::hex << +processor.output(x, y, 0) << std::endl;
-  //  }
-  //}
 
-  //testWavRead("distortion.wav");
+
   AudioFile<int16_t> outAudio;
-  outAudio.header = audioFile.header;
+  outAudio.header = f1.header;
   outAudio.data = processor.output;
-  writeAudioData<int16_t>("bin/" + filename + "1.wav", outAudio);
-  return ret_value;
-  //return processor.process_command(argc, argv);
+  writeAudioData<int16_t>("bin/output.wav", outAudio);
   
+  auto out = processor.output;
+  
+  
+  
+  // for (int i = 0; i < 40; i++)
+  // {
+	  // cout << in(i, 0) << "  " << in(i, 1) << endl;
+  // }
+  
+  // cout << endl << endl << endl;
+  
+  // for (int i = 0; i < 40; i++)
+  // {
+	  // cout << out(i, 0) << "  " << out(i, 1) << endl;
+  // }
+  
+  return ret_value;
 }

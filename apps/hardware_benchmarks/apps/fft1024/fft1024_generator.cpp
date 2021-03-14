@@ -116,7 +116,7 @@ class FFT1024 : public Halide::Generator<FFT1024> {
 			  hw_input.stream_to_accelerator();
         } else 
 		{
-			output.compute_root().vectorize(x, 64);
+			stages.compute_root();
         }
     }
 };

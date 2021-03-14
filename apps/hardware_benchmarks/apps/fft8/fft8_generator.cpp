@@ -91,8 +91,6 @@ class FFT8 : public Halide::Generator<FFT8> {
 
 			  hw_output.compute_root();
 			  
-			  
-			  
 			  hw_output
 				.tile(x, y, xo, yo, xi, yi, 8, 2)
 				.hw_accelerate(xi, xo);
