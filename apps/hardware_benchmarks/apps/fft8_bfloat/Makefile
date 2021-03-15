@@ -33,7 +33,7 @@ include ../../hw_support/Makefile.inc
 # RDAI_PLATFORM_RUNTIME         : RDAI platform runtime to use 
 ###############################################################################
 
-TESTNAME                        = audio
+TESTNAME                        = fft8_bfloat
 USE_COREIR_VALID                = 1
 HL_TARGET                       = host-x86-64
 RDAI_PLATFORM_RUNTIME           = clockwork_sim
@@ -48,12 +48,3 @@ RDAI_PLATFORM_RUNTIME           = clockwork_sim
 ###############################################################################
 
 include ../../hw_support/hardware_targets.mk
-
-
-
-
-
-
-
-# g++ audio_generator.cpp /mnt/c/users/kosho/desktop/aha/Halide-to-Hardware/tools/GenGen.cpp -g -std=c++17 -fno-rtti -I /mnt/c/users/kosho/desktop/aha/Halide-to-Hardware/include -L /mnt/c/users/kosho/desktop/aha/Halide-to-Hardware/bin -lHalide -lpthread -ldl -o a.out
-

@@ -8,9 +8,9 @@ using namespace std;
 using namespace Halide;
 using namespace Halide::ConciseCasts;
 
-class FFT8 : public Halide::Generator<FFT8> {
+class FFT8_unroll0 : public Halide::Generator<FFT8_unroll0> {
 	public:
-		Input<Buffer<float>> input{"in1", 2};
+		Input<Buffer<float>> input{"input", 2};
 		Output<Buffer<float>> output{"output", 2};
 
     void generate() {
@@ -57,26 +57,37 @@ class FFT8 : public Halide::Generator<FFT8> {
 		
 		// stages
 		Func hw_output;
-		ComplexFunc stages, twi_stages;
+		ComplexFunc twi_stages, stage0, stage1, stage2, stage3;
 		
-		stages(x, y) = ComplexExpr(0.0f, 0.0f); // n * log(n) (8 x 3)
-		stages(x, 0) = ComplexExpr(hw_input(x, 0), hw_input(x, 1));
+		twi_stages(x, z) = ComplexExpr(hw_twi(x, 0, z), hw_twi(x, 1, z)); // 8 x 3
 		
 		
-		twi_stages(x, z) = ComplexExpr(hw_twi(x, 0, z), hw_twi(x, 1, z));
+		stage0(x) = ComplexExpr(hw_input(x, 0), hw_input(x, 1));
+		stage1(x) = ComplexExpr(0.0f, 0.0f);
+		stage2(x) = ComplexExpr(0.0f, 0.0f);
+		stage3(x) = ComplexExpr(0.0f, 0.0f);
 		
-		for (int s = 1; s <= 3; s++)
-		{
-			int tmp = 1 << s;
-			
-			stages(t.x, s - 1) = stages(t.x, s - 1) * twi_stages(t.x, s - 1);
-			
-			stages(t.x, s) = (1 - 2 * (t.x / ((t.x / tmp) * tmp + tmp / 2))) *
-						     stages(t.x, s - 1) +
-						     stages((t.x + tmp / 2) % tmp + (t.x / tmp) * tmp, s - 1);
-		}
 		
-		hw_output(x, y) = select(y == 0, stages(x, 3).x, stages(x, 3).y);
+		
+		
+		
+		stage1(t.x) = (1 - 2 * (t.x / ((t.x / 2) * 2 + 2 / 2))) *
+						     stage0(t.x) * twi_stages(t.x, 0) +
+						     stage0((t.x + 2 / 2) % 2 + (t.x / 2) * 2) * twi_stages((t.x + 2 / 2) % 2 + (t.x / 2) * 2, 0);
+							 
+		stage2(t.x) = (1 - 2 * (t.x / ((t.x / 4) * 4 + 4 / 2))) *
+						     stage1(t.x) * twi_stages(t.x, 1) +
+						     stage1((t.x + 4 / 2) % 4 + (t.x / 4) * 4) * twi_stages((t.x + 4 / 2) % 4 + (t.x / 4) * 4, 1);
+							 
+		stage3(t.x) = (1 - 2 * (t.x / ((t.x / 8) * 8 + 8 / 2))) *
+						     stage2(t.x) * twi_stages(t.x, 2) +
+						     stage2((t.x + 8 / 2) % 8 + (t.x / 8) * 8) * twi_stages((t.x + 8 / 2) % 8 + (t.x / 8) * 8, 2);
+		
+		
+		
+		
+		
+		hw_output(x, y) = select(y == 0, stage3(x).x, stage3(x).y);
 		output(x, y) = hw_output(x, y);
 		////////////////////////////////////////////////////////////////////////
 		
@@ -96,17 +107,22 @@ class FFT8 : public Halide::Generator<FFT8> {
 				.hw_accelerate(xi, xo);
 				
 				
-			  // stages.unroll(x, 2);
+			  // stage3.unroll(x, 8);
+			  // stage2.unroll(x, 8);
+			  // stage1.unroll(x, 8);
+			  
 			  
 			  hw_twi.stream_to_accelerator();
 			  hw_input.stream_to_accelerator();
         } else 
 		{
-			stages.compute_root();
+			stage3.compute_root();
+			stage2.compute_root();
+			stage1.compute_root();
         }
     }
 };
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(FFT8, fft8)
+HALIDE_REGISTER_GENERATOR(FFT8_unroll0, fft8_unroll0)
