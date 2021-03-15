@@ -8,10 +8,10 @@ using namespace std;
 using namespace Halide;
 using namespace Halide::ConciseCasts;
 
-class FFT8_bfloat : public Halide::Generator<FFT8_bfloat> {
+class FFT8_onestage_unroll8 : public Halide::Generator<FFT8_onestage_unroll8> {
 	public:
-		Input<Buffer<bfloat16_t>> input{"in1", 2};
-		Output<Buffer<bfloat16_t>> output{"output", 2};
+		Input<Buffer<float>> input{"input", 2};
+		Output<Buffer<float>> output{"output", 2};
 
     void generate() {
 		Var x, y, z;
@@ -40,9 +40,10 @@ class FFT8_bfloat : public Halide::Generator<FFT8_bfloat> {
 		ComplexFunc twi;
 		Func hw_twi;
 		
-		twi(x) = expj(-2 * bfloat16_t(atan(1)*4) * x / 8);
+		float PI = atan(1)*4;
+		twi(x) = expj(-2 * PI * x / 8);
 		
-		hw_twi(x, y, z) = bfloat16_t(0.0f);
+		hw_twi(x, y, z) = 0.0f;
 		for (int s = 1; s <= 3; s++)
 		{
 			int tmp = 1 << s;
@@ -56,24 +57,32 @@ class FFT8_bfloat : public Halide::Generator<FFT8_bfloat> {
 		
 		// stages
 		Func hw_output;
-		ComplexFunc stages, twi_stages;
+		ComplexFunc twi_stages, stages;
 		
-		stages(x, y) = ComplexExpr(bfloat16_t(0.0f), bfloat16_t(0.0f)); // n * log(n) (8 x 3)
+		twi_stages(x, z) = ComplexExpr(hw_twi(x, 0, z), hw_twi(x, 1, z)); // 8 x 3
+		
+		stages(x, y) = ComplexExpr(0.0f, 0.0f);
 		stages(x, 0) = ComplexExpr(hw_input(x, 0), hw_input(x, 1));
 		
 		
-		twi_stages(x, z) = ComplexExpr(hw_twi(x, 0, z), hw_twi(x, 1, z));
 		
-		for (int s = 1; s <= 3; s++)
-		{
-			int tmp = 1 << s;
-			
-			stages(t.x, s - 1) = stages(t.x, s - 1) * twi_stages(t.x, s - 1);
-			
-			stages(t.x, s) = (1 - 2 * (t.x / ((t.x / tmp) * tmp + tmp / 2))) *
-						     stages(t.x, s - 1) +
-						     stages((t.x + tmp / 2) % tmp + (t.x / tmp) * tmp, s - 1);
-		}
+		
+		
+		stages(t.x, 1) = (1 - 2 * (t.x / ((t.x / 2) * 2 + 2 / 2))) *
+						     stages(t.x, 0) * twi_stages(t.x, 0) +
+						     stages((t.x + 2 / 2) % 2 + (t.x / 2) * 2, 0) * twi_stages((t.x + 2 / 2) % 2 + (t.x / 2) * 2, 0);
+							 
+		stages(t.x, 2) = (1 - 2 * (t.x / ((t.x / 4) * 4 + 4 / 2))) *
+						     stages(t.x, 1) * twi_stages(t.x, 1) +
+						     stages((t.x + 4 / 2) % 4 + (t.x / 4) * 4, 1) * twi_stages((t.x + 4 / 2) % 4 + (t.x / 4) * 4, 1);
+							 
+		stages(t.x, 3) = (1 - 2 * (t.x / ((t.x / 8) * 8 + 8 / 2))) *
+						     stages(t.x, 2) * twi_stages(t.x, 2) +
+						     stages((t.x + 8 / 2) % 8 + (t.x / 8) * 8, 2) * twi_stages((t.x + 8 / 2) % 8 + (t.x / 8) * 8, 2);
+		
+		
+		
+		
 		
 		hw_output(x, y) = select(y == 0, stages(x, 3).x, stages(x, 3).y);
 		output(x, y) = hw_output(x, y);
@@ -94,8 +103,11 @@ class FFT8_bfloat : public Halide::Generator<FFT8_bfloat> {
 				.tile(x, y, xo, yo, xi, yi, 8, 2)
 				.hw_accelerate(xi, xo);
 				
-				
-			  // stages.unroll(x, 2);
+			
+			
+			  stages.compute_at(hw_output, xo).unroll(x, 8);
+
+			  
 			  
 			  hw_twi.stream_to_accelerator();
 			  hw_input.stream_to_accelerator();
@@ -108,4 +120,4 @@ class FFT8_bfloat : public Halide::Generator<FFT8_bfloat> {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(FFT8_bfloat, fft8_bfloat)
+HALIDE_REGISTER_GENERATOR(FFT8_onestage_unroll8, fft8_onestage_unroll8)

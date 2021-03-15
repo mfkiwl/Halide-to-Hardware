@@ -8,10 +8,10 @@ using namespace std;
 using namespace Halide;
 using namespace Halide::ConciseCasts;
 
-class FFT8_unroll2 : public Halide::Generator<FFT8_unroll2> {
+class FFT8_bfloat_unroll0 : public Halide::Generator<FFT8_bfloat_unroll0> {
 	public:
-		Input<Buffer<float>> input{"input", 2};
-		Output<Buffer<float>> output{"output", 2};
+		Input<Buffer<bfloat16_t>> input{"input", 2};
+		Output<Buffer<bfloat16_t>> output{"output", 2};
 
     void generate() {
 		Var x, y, z;
@@ -43,7 +43,7 @@ class FFT8_unroll2 : public Halide::Generator<FFT8_unroll2> {
 		float PI = atan(1)*4;
 		twi(x) = expj(-2 * PI * x / 8);
 		
-		hw_twi(x, y, z) = 0.0f;
+		hw_twi(x, y, z) = bfloat16_t(0.0f);
 		for (int s = 1; s <= 3; s++)
 		{
 			int tmp = 1 << s;
@@ -63,9 +63,9 @@ class FFT8_unroll2 : public Halide::Generator<FFT8_unroll2> {
 		
 		
 		stage0(x) = ComplexExpr(hw_input(x, 0), hw_input(x, 1));
-		stage1(x) = ComplexExpr(0.0f, 0.0f);
-		stage2(x) = ComplexExpr(0.0f, 0.0f);
-		stage3(x) = ComplexExpr(0.0f, 0.0f);
+		stage1(x) = ComplexExpr(bfloat16_t(0.0f), bfloat16_t(0.0f));
+		stage2(x) = ComplexExpr(bfloat16_t(0.0f), bfloat16_t(0.0f));
+		stage3(x) = ComplexExpr(bfloat16_t(0.0f), bfloat16_t(0.0f));
 		
 		
 		
@@ -107,9 +107,9 @@ class FFT8_unroll2 : public Halide::Generator<FFT8_unroll2> {
 				.hw_accelerate(xi, xo);
 				
 				
-			  stage3.compute_at(hw_output, xo).unroll(x, 2); 
-			  stage2.compute_at(hw_output, xo).unroll(x, 2);                        
-			  stage1.compute_at(hw_output, xo).unroll(x, 2);
+			  // stage3.unroll(x, 8);
+			  // stage2.unroll(x, 8);
+			  // stage1.unroll(x, 8);
 			  
 			  
 			  hw_twi.stream_to_accelerator();
@@ -125,4 +125,4 @@ class FFT8_unroll2 : public Halide::Generator<FFT8_unroll2> {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(FFT8_unroll2, fft8_unroll2)
+HALIDE_REGISTER_GENERATOR(FFT8_bfloat_unroll0, fft8_bfloat_unroll0)

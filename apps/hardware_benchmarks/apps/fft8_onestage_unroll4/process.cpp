@@ -3,13 +3,13 @@
 #include <chrono>
 
 #if defined(WITH_CPU)
-   #include "fft8_bfloat.h"
+   #include "fft8_onestage_unroll4.h"
 #endif
 
 #if defined(WITH_CLOCKWORK)
     #include "rdai_api.h"
     #include "clockwork_sim_platform.h"
-    #include "fft8_bfloat_clockwork.h"
+    #include "fft8_onestage_unroll4_clockwork.h"
 #endif
 
 using namespace std;
@@ -18,11 +18,11 @@ using namespace Halide::Runtime;
 
 int main( int argc, char **argv ) {
   std::map<std::string, std::function<void()>> functions;
-  OneInOneOut_ProcessController<bfloat16_t> processor("fft8_bfloat");
+  OneInOneOut_ProcessController<float> processor("fft8_onestage_unroll4");
 
   #if defined(WITH_CPU)
       auto cpu_process = [&]( auto &proc ) {
-		fft8_bfloat(proc.input, proc.output);
+		fft8_onestage_unroll4(proc.input, proc.output);
       };
       functions["cpu"] = [&](){ cpu_process( processor ); } ;
   #endif
@@ -32,7 +32,7 @@ int main( int argc, char **argv ) {
         RDAI_Platform *rdai_platform = RDAI_register_platform( &rdai_clockwork_sim_ops );
         if ( rdai_platform ) {
           printf( "[RUN_INFO] found an RDAI platform\n" );
-          fft8_bfloat(proc.input, proc.output);
+          fft8_onestage_unroll4(proc.input, proc.output);
           RDAI_unregister_platform( rdai_platform );
         } else {
           printf("[RUN_INFO] failed to register RDAI platform!\n");
@@ -43,14 +43,14 @@ int main( int argc, char **argv ) {
 
   // Add all defined functions
   processor.run_calls = functions;
-  processor.input = Buffer<bfloat16_t>(8, 2);
+  processor.input = Buffer<float>(8, 2);
   
   auto in = processor.input;
 
   for (int i = 0; i < 8; i++)
   {
-	  in(i, 0) = (bfloat16_t(rand()) / RAND_MAX - 0.5) * 2000;
-	  in(i, 1) = (bfloat16_t(rand()) / RAND_MAX - 0.5) * 2000;
+	  in(i, 0) = (float(rand()) / RAND_MAX - 0.5) * 2000;
+	  in(i, 1) = (float(rand()) / RAND_MAX - 0.5) * 2000;
 
 	  cout << in(i, 0) << "+" << in(i, 1) << "i" << endl;
   }
@@ -58,7 +58,7 @@ int main( int argc, char **argv ) {
   cout << endl << endl << endl;
   
   processor.inputs_preset = true;
-  processor.output = Buffer<bfloat16_t>(8, 2);
+  processor.output = Buffer<float>(8, 2);
   
   
   

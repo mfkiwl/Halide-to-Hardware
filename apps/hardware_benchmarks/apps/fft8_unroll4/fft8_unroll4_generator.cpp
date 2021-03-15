@@ -107,9 +107,9 @@ class FFT8_unroll4 : public Halide::Generator<FFT8_unroll4> {
 				.hw_accelerate(xi, xo);
 				
 				
-			  stage3.unroll(x, 4);
-			  stage2.unroll(x, 4);
-			  stage1.unroll(x, 4);
+			  stage3.compute_at(hw_output, xo).unroll(x, 4); 
+			  stage2.compute_at(hw_output, xo).unroll(x, 4);                        
+			  stage1.compute_at(hw_output, xo).unroll(x, 4);
 			  
 			  
 			  hw_twi.stream_to_accelerator();

@@ -5,9 +5,6 @@
 
 #include "funct.h"
 
-using namespace std;
-using namespace Halide;
-
 // Complex number expression in Halide. This maps complex number Tuples
 // to a type we can use for function overloading (especially operator
 // overloading).
@@ -20,16 +17,16 @@ struct ComplexExpr {
 
     // A default constructed complex number is zero.
     ComplexExpr()
-        : x(bfloat16_t(0.0f)), y(bfloat16_t(0.0f)) {
+        : x(0.0f), y(0.0f) {
     }
     ComplexExpr(float x, float y)
-        : x(bfloat16_t(x)), y(bfloat16_t(y)) {
+        : x(x), y(y) {
     }
     // This constructor will implicitly convert a real number (either
     // Halide::Expr or constant float) to a complex number with an
     // imaginary part of zero.
-    ComplexExpr(Halide::Expr x, Halide::Expr y = bfloat16_t(0.0f))
-        : x(bfloat16_t(x)), y(bfloat16_t(y)) {
+    ComplexExpr(Halide::Expr x, Halide::Expr y = 0.0f)
+        : x(x), y(y) {
     }
 
     Halide::Expr re() {
@@ -65,7 +62,7 @@ inline Halide::Expr re(Halide::Expr x) {
     return x;
 }
 inline Halide::Expr im(Halide::Expr x) {
-    return bfloat16_t(0.0f);
+    return 0.0f;
 }
 
 inline ComplexExpr conj(ComplexExpr z) {
