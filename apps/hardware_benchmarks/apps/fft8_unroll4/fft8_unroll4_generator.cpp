@@ -46,10 +46,10 @@ class FFT8_unroll4 : public Halide::Generator<FFT8_unroll4> {
 		hw_twi(x, y, z) = 0.0f;
 		for (int s = 1; s <= 3; s++)
 		{
-			int tmp = 1 << s;
+			int tmp = 1 << (s - 1);
 			
-			hw_twi(t.x, 0, s - 1) = twi(((t.x % tmp) / (tmp / 2)) * (t.x % (tmp / 2)) * (8 / tmp)).x;
-			hw_twi(t.x, 1, s - 1) = twi(((t.x % tmp) / (tmp / 2)) * (t.x % (tmp / 2)) * (8 / tmp)).y;
+			hw_twi(t.x, 0, s - 1) = twi((t.x / (8 / tmp)) * (8 / (2 * tmp)) * (t.x % 2)).x;
+			hw_twi(t.x, 1, s - 1) = twi((t.x / (8 / tmp)) * (8 / (2 * tmp)) * (t.x % 2)).y;
 		} // stream this into accelerator
 		///////////////////////////////////////////
 		
@@ -67,21 +67,29 @@ class FFT8_unroll4 : public Halide::Generator<FFT8_unroll4> {
 		stage2(x) = ComplexExpr(0.0f, 0.0f);
 		stage3(x) = ComplexExpr(0.0f, 0.0f);
 		
+
+					  
+		stage1(t.x) = (1 - 2 * (((t.x >> 2) + ((t.x & 3) << 1)) % 2)) *
+					  stage0((t.x >> 2) + ((t.x & 3) << 1)) *
+					  twi_stages((t.x >> 2) + ((t.x & 3) << 1), 0) +
+					  stage0((((t.x >> 2) + ((t.x & 3) << 1)) + 1) % 2 + (((t.x >> 2) + ((t.x & 3) << 1)) / 2) * 2) *
+					  twi_stages((((t.x >> 2) + ((t.x & 3) << 1)) + 1) % 2 + (((t.x >> 2) + ((t.x & 3) << 1)) / 2) * 2, 0);
 		
 		
 		
-		
-		stage1(t.x) = (1 - 2 * (t.x / ((t.x / 2) * 2 + 2 / 2))) *
-						     stage0(t.x) * twi_stages(t.x, 0) +
-						     stage0((t.x + 2 / 2) % 2 + (t.x / 2) * 2) * twi_stages((t.x + 2 / 2) % 2 + (t.x / 2) * 2, 0);
-							 
-		stage2(t.x) = (1 - 2 * (t.x / ((t.x / 4) * 4 + 4 / 2))) *
-						     stage1(t.x) * twi_stages(t.x, 1) +
-						     stage1((t.x + 4 / 2) % 4 + (t.x / 4) * 4) * twi_stages((t.x + 4 / 2) % 4 + (t.x / 4) * 4, 1);
-							 
-		stage3(t.x) = (1 - 2 * (t.x / ((t.x / 8) * 8 + 8 / 2))) *
-						     stage2(t.x) * twi_stages(t.x, 2) +
-						     stage2((t.x + 8 / 2) % 8 + (t.x / 8) * 8) * twi_stages((t.x + 8 / 2) % 8 + (t.x / 8) * 8, 2);
+		stage2(t.x) = (1 - 2 * (((t.x >> 2) + ((t.x & 3) << 1)) % 2)) *
+					  stage1((t.x >> 2) + ((t.x & 3) << 1)) *
+					  twi_stages((t.x >> 2) + ((t.x & 3) << 1), 1) +
+					  stage1((((t.x >> 2) + ((t.x & 3) << 1)) + 1) % 2 + (((t.x >> 2) + ((t.x & 3) << 1)) / 2) * 2) *
+					  twi_stages((((t.x >> 2) + ((t.x & 3) << 1)) + 1) % 2 + (((t.x >> 2) + ((t.x & 3) << 1)) / 2) * 2, 1);
+					  
+					  
+					  
+		stage3(t.x) = (1 - 2 * (((t.x >> 2) + ((t.x & 3) << 1)) % 2)) *
+					  stage2((t.x >> 2) + ((t.x & 3) << 1)) *
+					  twi_stages((t.x >> 2) + ((t.x & 3) << 1), 2) +
+					  stage2((((t.x >> 2) + ((t.x & 3) << 1)) + 1) % 2 + (((t.x >> 2) + ((t.x & 3) << 1)) / 2) * 2) *
+					  twi_stages((((t.x >> 2) + ((t.x & 3) << 1)) + 1) % 2 + (((t.x >> 2) + ((t.x & 3) << 1)) / 2) * 2, 2);
 		
 		
 		
@@ -107,9 +115,10 @@ class FFT8_unroll4 : public Halide::Generator<FFT8_unroll4> {
 				.hw_accelerate(xi, xo);
 				
 				
+			  
 			  stage3.compute_at(hw_output, xo).unroll(x, 4); 
 			  stage2.compute_at(hw_output, xo).unroll(x, 4);                        
-			  stage1.compute_at(hw_output, xo).unroll(x, 4);
+			  stage1.compute_at(hw_output, xo).unroll(x, 4); 
 			  
 			  
 			  hw_twi.stream_to_accelerator();
