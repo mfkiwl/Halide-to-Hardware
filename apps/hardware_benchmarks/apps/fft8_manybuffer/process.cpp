@@ -3,13 +3,13 @@
 #include <chrono>
 
 #if defined(WITH_CPU)
-   #include "fft8_onebuffer_unroll8.h"
+   #include "fft8_manybuffer.h"
 #endif
 
 #if defined(WITH_CLOCKWORK)
     #include "rdai_api.h"
     #include "clockwork_sim_platform.h"
-    #include "fft8_onebuffer_unroll8_clockwork.h"
+    #include "fft8_manybuffer_clockwork.h"
 #endif
 
 using namespace std;
@@ -18,11 +18,11 @@ using namespace Halide::Runtime;
 
 int main( int argc, char **argv ) {
   std::map<std::string, std::function<void()>> functions;
-  OneInOneOut_ProcessController<float> processor("fft8_onebuffer_unroll8");
+  OneInOneOut_ProcessController<float> processor("fft8_manybuffer");
 
   #if defined(WITH_CPU)
       auto cpu_process = [&]( auto &proc ) {
-		fft8_onebuffer_unroll8(proc.input, proc.output);
+		fft8_manybuffer(proc.input, proc.output);
       };
       functions["cpu"] = [&](){ cpu_process( processor ); } ;
   #endif
@@ -32,7 +32,7 @@ int main( int argc, char **argv ) {
         RDAI_Platform *rdai_platform = RDAI_register_platform( &rdai_clockwork_sim_ops );
         if ( rdai_platform ) {
           printf( "[RUN_INFO] found an RDAI platform\n" );
-          fft8_onebuffer_unroll8(proc.input, proc.output);
+          fft8_manybuffer(proc.input, proc.output);
           RDAI_unregister_platform( rdai_platform );
         } else {
           printf("[RUN_INFO] failed to register RDAI platform!\n");
